@@ -1,0 +1,3983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EcoPulse OS - Autonomous GIS Waste Management &amp; Logistics System</title>
+  <style>
+    /* ========================================================================== */
+    /* ===== PALANTIR / LINEAR CYBER-INDUSTRIAL DESIGN SYSTEM =================== */
+    /* ========================================================================== */
+    :root {
+      --bg-base: #06090e;
+      --bg-surface: #0c121d;
+      --bg-elevated: #131c2e;
+      --bg-panel: rgba(12, 18, 29, 0.94);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(16, 185, 129, 0.4);
+      --border-focus: #10b981;
+      --text: #f8fafc;
+      --text-muted: #8b9bb4;
+      --text-dim: #54657e;
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --accent: #06b6d4;
+      --accent-glow: rgba(6, 182, 212, 0.25);
+      --danger: #ef4444;
+      --danger-glow: rgba(239, 68, 68, 0.25);
+      --warning: #f59e0b;
+      --purple: #8b5cf6;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --radius: 8px;
+      --radius-lg: 14px;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body.light-theme {
+      --bg-base: #f1f5f9;
+      --bg-surface: #ffffff;
+      --bg-elevated: #e2e8f0;
+      --bg-panel: rgba(255, 255, 255, 0.96);
+      --border: rgba(0, 0, 0, 0.09);
+      --border-accent: rgba(5, 150, 105, 0.35);
+      --border-focus: #059669;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --text-dim: #94a3b8;
+      --primary: #059669;
+      --primary-hover: #047857;
+      --primary-glow: rgba(5, 150, 105, 0.15);
+      --accent: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.15);
+      --danger: #dc2626;
+      --danger-glow: rgba(220, 38, 38, 0.15);
+      --warning: #d97706;
+      --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    #confetti-canvas {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 99999;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+    button, input, select, textarea { font-family: inherit; font-size: 0.9rem; color: inherit; }
+    button { cursor: pointer; border: 1px solid transparent; border-radius: var(--radius); transition: var(--transition); user-select: none; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 1px;
+    }
+
+    .btn {
+      padding: 0.55rem 1.1rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+    .btn-primary:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 18px var(--primary-glow); }
+    .btn-secondary { background: var(--bg-surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg-elevated); border-color: var(--border-accent); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-danger:hover { opacity: 0.9; }
+    .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-assigned { background: rgba(6, 182, 212, 0.15); color: var(--accent); border: 1px solid rgba(6, 182, 212, 0.4); }
+    .badge-in_progress { background: rgba(139, 92, 246, 0.15); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.4); }
+    .badge-resolved { background: rgba(16, 185, 129, 0.15); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.4); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .panel {
+      background: var(--bg-panel);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    .header-bar {
+      background: var(--bg-panel);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      cursor: pointer;
+    }
+    .brand-mark {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 900; font-size: 14px;
+    }
+    .nav-links { display: flex; gap: 0.4rem; list-style: none; }
+    .nav-item {
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      color: var(--text-muted);
+    }
+    .nav-item:hover { color: var(--text); background: var(--bg-surface); }
+    .nav-item.active { color: var(--primary); background: rgba(16, 185, 129, 0.12); font-weight: 700; }
+
+    .nav-actions { display: flex; align-items: center; gap: 0.75rem; }
+    .icon-btn {
+      position: relative;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+    }
+    .notif-badge {
+      position: absolute;
+      top: -4px; right: -4px;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      border-radius: 9999px;
+      padding: 1px 5px;
+    }
+
+    .main-viewport {
+      flex: 1;
+      max-width: 1440px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 1.5rem 2rem;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.25rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; }
+
+    .form-group { margin-bottom: 1.1rem; }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+    .form-control {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .form-control:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .form-error { color: var(--danger); font-size: 0.8rem; margin-top: 0.3rem; display: none; font-weight: 600; }
+    .form-error.visible { display: block; }
+
+    #toast-container {
+      position: fixed;
+      bottom: 1.5rem; right: 1.5rem;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      pointer-events: none;
+    }
+    .toast {
+      padding: 0.85rem 1.25rem;
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      min-width: 280px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: var(--transition);
+      pointer-events: auto;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast-success { background: var(--primary); }
+    .toast-error { background: var(--danger); }
+    .toast-info { background: var(--accent); }
+
+    .stepper { display: flex; justify-content: space-between; position: relative; margin: 1.5rem 0; }
+    .stepper::before {
+      content: "";
+      position: absolute;
+      top: 14px; left: 20px; right: 20px;
+      height: 2px;
+      background: var(--border);
+      z-index: 1;
+    }
+    .stepper-step { position: relative; z-index: 2; text-align: center; flex: 1; font-size: 0.75rem; }
+    .stepper-dot {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 0.35rem auto;
+      font-weight: 700; color: var(--text-muted);
+    }
+    .stepper-step.active .stepper-dot {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+    .stepper-step.active { color: var(--text); font-weight: 700; }
+
+    /* ========================================================================== */
+    /* ===== GIS MAP ENGINE STYLES (ZOOM, PAN, HUDS, STREETS, PULSES) ========== */
+    /* ========================================================================== */
+    .gis-stage {
+      width: 100%;
+      height: 380px;
+      background: #06090e;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      user-select: none;
+    }
+    .gis-stage:active { cursor: grabbing; }
+
+    .gis-ctrl-bar {
+      position: absolute;
+      top: 10px; left: 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.35rem 0.75rem;
+      display: flex;
+      gap: 0.6rem;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      z-index: 25;
+      align-items: center;
+      box-shadow: var(--shadow);
+    }
+
+    .gis-zoom-tools {
+      position: absolute;
+      top: 10px; right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      z-index: 25;
+    }
+    .gis-tool-btn {
+      width: 32px; height: 32px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem;
+      box-shadow: var(--shadow);
+    }
+    .gis-tool-btn:hover { background: var(--bg-elevated); border-color: var(--border-accent); }
+
+    .gis-live-coords-hud {
+      position: absolute;
+      bottom: 10px; left: 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.25rem 0.55rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent);
+      z-index: 25;
+      pointer-events: none;
+    }
+
+    .gis-hud-card {
+      position: absolute;
+      bottom: 12px; right: 12px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.1rem;
+      font-size: 0.82rem;
+      box-shadow: var(--shadow);
+      max-width: 290px;
+      display: none;
+      z-index: 30;
+    }
+
+    @keyframes radarPulse {
+      0% { r: 5; opacity: 1; }
+      50% { r: 18; opacity: 0.4; }
+      100% { r: 5; opacity: 1; }
+    }
+    .radar-pulse-ring {
+      animation: radarPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes laserScan {
+      0% { top: 0%; opacity: 0.9; }
+      50% { top: 96%; opacity: 1; }
+      100% { top: 0%; opacity: 0.9; }
+    }
+
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .header-bar, #toast-container, .no-print, .btn, #confetti-canvas { display: none !important; }
+      .panel { border: 1px solid #ccc !important; box-shadow: none !important; background: #fff !important; break-inside: avoid; }
+      .main-viewport { max-width: 100% !important; padding: 0 !important; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div id="app">
+    <header class="header-bar">
+      <div class="brand" data-route="home">
+        <div class="brand-mark">&#9851;</div>
+        <span>EcoPulse OS</span>
+      </div>
+      <ul class="nav-links" id="main-nav"></ul>
+      <div class="nav-actions">
+        <select id="lang-selector-header" class="form-control" style="width: auto; padding: 0.35rem 0.6rem; font-size: 0.82rem; font-weight: 600; background: var(--bg-surface); border: 1px solid var(--border);"></select>
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">&#9788;</button>
+        <button id="notif-btn" class="icon-btn" aria-label="Notifications" style="display: none;">
+          &#128276;<span class="notif-badge" id="notif-count" style="display: none;">0</span>
+        </button>
+        <div id="auth-actions"></div>
+      </div>
+    </header>
+
+    <main class="main-viewport" id="viewport"></main>
+  </div>
+
+  <div id="toast-container"></div>
+  <div id="modal-container"></div>
+
+  <script>
+/* ========================================================================== */
+/* ===== EXPANDED A-TO-Z MULTI-LANGUAGE ENGINE (i18n) ======================= */
+/* ========================================================================== */
+
+const I18nEngine = {
+  currentLang: "en",
+  languages: [
+    { code: "ar", label: "A - العربية (Arabic)" },
+    { code: "bn", label: "B - বাংলা (Bengali)" },
+    { code: "zh", label: "C - 中文 (Chinese)" },
+    { code: "nl", label: "D - Nederlands (Dutch)" },
+    { code: "en", label: "E - English (Default)" },
+    { code: "fr", label: "F - Français (French)" },
+    { code: "de", label: "G - Deutsch (German)" },
+    { code: "hi", label: "H - हिन्दी (Hindi)" },
+    { code: "it", label: "I - Italiano (Italian)" },
+    { code: "ja", label: "J - 日本語 (Japanese)" },
+    { code: "kn", label: "K - ಕನ್ನಡ (Kannada)" },
+    { code: "la", label: "L - Latina (Latin)" },
+    { code: "mr", label: "M - मराठी (Marathi)" },
+    { code: "no", label: "N - Norsk (Norwegian)" },
+    { code: "or", label: "O - ଓଡ଼ିଆ (Odia)" },
+    { code: "pt", label: "P - Português (Portuguese)" },
+    { code: "qu", label: "Q - Quechua (Quechua)" },
+    { code: "ru", label: "R - Русский (Russian)" },
+    { code: "es", label: "S - Español (Spanish)" },
+    { code: "ta", label: "T - தமிழ் (Tamil)" },
+    { code: "uk", label: "U - Українська (Ukrainian)" },
+    { code: "vi", label: "V - Tiếng Việt (Vietnamese)" },
+    { code: "cy", label: "W - Cymraeg (Welsh)" },
+    { code: "xh", label: "X - isiXhosa (Xhosa)" },
+    { code: "yo", label: "Y - Yorùbá (Yoruba)" },
+    { code: "zu", label: "Z - isiZulu (Zulu)" }
+  ],
+  translations: {
+    en: {
+      nav_home: "Home",
+      nav_report: "Report Incident",
+      nav_pickup: "Book Pickup",
+      nav_tracking: "Track Issues",
+      nav_admin: "Command Center",
+      nav_awareness: "Awareness & Quiz",
+      nav_signin: "Sign In",
+      nav_signout: "Sign Out",
+      hero_tag: "MUNICIPAL LOGISTICS AUTOMATION PLATFORM",
+      hero_title: "Intelligent Solid Waste Dispatch & GIS Geocoding",
+      hero_desc: "Equipping citizens with AI-assisted dumping reporting, doorstep segregated recovery, and real-time municipal logistics telemetry.",
+      btn_report_public: "Report Public Waste",
+      btn_book_doorstep: "Book Doorstep Pickup",
+      btn_segregation_lab: "Segregation Lab",
+      kpi_total: "Total Incidents Ingested",
+      kpi_resolved: "Cleanup Deployments Completed",
+      kpi_diverted: "Municipal Landfill Waste Diverted",
+      ai_vision_title: "AI Neural Computer Vision",
+      ai_vision_desc: "Upload trash photos to invoke our client-side luminance & color spectrum classifier with animated HUD bounding boxes to automatically detect waste type before reporting.",
+      btn_test_ai: "Test AI Scanner",
+      gis_fleet_title: "Interactive GIS Fleet Optimization",
+      gis_fleet_desc: "Administrative personnel can view live radar pins, identify chronic incident hotspots, and run Traveling Salesperson routing algorithms to calculate shortest vehicle loops.",
+      btn_view_radar: "View Command Radar",
+      rep_title: "Report Waste Incident",
+      rep_subtitle: "AI Computer Vision & Interactive GIS Waypoint Tagging",
+      rep_draft_active: "Draft Active",
+      rep_type_label: "Waste Classification",
+      rep_type_placeholder: "Select or scan with AI...",
+      rep_type_overflow: "Overflowing bin",
+      rep_type_road: "Garbage on road",
+      rep_type_missed: "Missed collection",
+      rep_type_dump: "Illegal dumping",
+      rep_type_haz: "Hazardous dump",
+      rep_type_other: "Other",
+      rep_loc_label: "Incident Location (Click GIS Map to Pin)",
+      rep_gis_label: "Interactive Municipal GIS Pin Picker (Pan/Zoom/Click to Tag)",
+      rep_prio_label: "Severity Priority",
+      rep_prio_low: "Low",
+      rep_prio_med: "Medium",
+      rep_prio_high: "High",
+      rep_desc_label: "Description",
+      rep_desc_placeholder: "Explain obstruction hazards or overflow volume...",
+      btn_submit_incident: "Submit Incident Complaint",
+      ai_lab_title: "AI Computer Vision Lab",
+      ai_lab_subtitle: "Attach photo for instant pixel spectrum neural analysis",
+      ai_lab_attach_prompt: "Attach an image to initiate AI HUD scanner",
+      ai_detection_label: "NEURAL DETECTION",
+      ai_accept_prompt: "Accept AI Classification:",
+      btn_apply: "Apply",
+      pik_title: "Doorstep Waste Recovery",
+      pik_subtitle: "Schedule bulky, organic, or hazardous collection with GIS waypoint location",
+      pik_type_label: "Waste Classification",
+      pik_type_placeholder: "Select waste category...",
+      pik_type_wet: "Wet/organic",
+      pik_type_dry: "Dry/recyclable",
+      pik_type_haz: "Hazardous",
+      pik_type_ewaste: "E-waste",
+      pik_type_bulk: "Bulk/garden",
+      pik_addr_label: "Collection Address (Click GIS Map to Pinpoint)",
+      pik_gis_label: "Interactive Municipal GIS Waypoint Picker (Pan/Zoom/Click to Tag)",
+      pik_date_label: "Pickup Date",
+      pik_slot_label: "Time Slot",
+      pik_slot_select: "Select window...",
+      pik_slot_morning: "Morning (8 AM - 11 AM)",
+      pik_slot_afternoon: "Afternoon (12 PM - 3 PM)",
+      pik_slot_evening: "Evening (4 PM - 7 PM)",
+      pik_slot_full: "Slot Full (3/3 vans scheduled). Please select an alternate window.",
+      pik_slot_avail: "Slot Available",
+      pik_repeat_label: "Frequency Cadence",
+      pik_repeat_onetime: "One time",
+      pik_repeat_weekly: "Weekly",
+      pik_repeat_monthly: "Monthly",
+      pik_notes_label: "Instructions (Optional)",
+      btn_sched_pickup: "Schedule Collection",
+      trk_title: "Lifecycle Complaint & Pickup Tracking",
+      trk_subtitle: "Track real-time resolution timelines, GIS waypoints, and leave feedback",
+      trk_search_placeholder: "Search records...",
+      opt_all_status: "All Status",
+      opt_newest: "Newest",
+      opt_oldest: "Oldest",
+      step_submitted: "Submitted",
+      step_assigned: "Assigned",
+      step_in_progress: "In Progress",
+      step_resolved: "Resolved",
+      btn_inspect_gis: "Inspect on GIS Map",
+      badge_report: "PUBLIC REPORT",
+      badge_pickup: "PICKUP BOOKING",
+      rating_label: "Resolution Rating:",
+      btn_resched: "Reschedule",
+      btn_cancel: "Cancel",
+      btn_withdraw: "Withdraw Report",
+      adm_title: "Executive Command Console & GIS Fleet Logistics",
+      adm_subtitle: "Interactive geospatial radar, pan/zoom telemetry, and TSP fleet route optimization",
+      btn_load_demo: "Load Demo Data",
+      btn_purge_data: "Purge Data",
+      btn_export_csv: "Export CSV",
+      btn_print_report: "Print Report",
+      adm_kpi_total: "Total Ingestion Logs",
+      adm_kpi_pending: "Pending Verification",
+      adm_kpi_overdue: "Overdue SLA (>3 Days)",
+      adm_kpi_turnaround: "Mean Resolution Time",
+      adm_radar_title: "Interactive Municipal GIS Incident Radar",
+      adm_radar_subtitle: "Pan, zoom, inspect pins across 4 sectors, or execute AI Route Optimization",
+      btn_run_fleet_opt: "Run AI Route Optimization",
+      adm_chart_status: "Status Allocation",
+      adm_chart_types: "Incident Types",
+      adm_chart_velocity: "7-Day Dispatch Velocity",
+      adm_tbl_title: "Municipal Operations Master Register",
+      adm_tbl_id: "ID",
+      adm_tbl_type: "Classification",
+      adm_tbl_loc: "Location / Landmark",
+      adm_tbl_time: "Logged At",
+      adm_tbl_status: "Status",
+      adm_tbl_unit: "Dispatched Team",
+      adm_tbl_action: "Action",
+      btn_triage: "Triage",
+      aw_title: "Circular Resource Segregation Lab",
+      aw_subtitle: "Eliminate cross-contamination at the source",
+      aw_daily_directive: "Daily Municipal Directive",
+      aw_impact_title: "Community Recovery Footprint",
+      aw_bin_standards: "Segregation Standard Categories",
+      aw_bin_wet: "Wet / Organic",
+      aw_bin_dry: "Dry / Recyclable",
+      aw_bin_haz: "Hazardous Waste",
+      aw_bin_ewaste: "Electronic Waste",
+      aw_dir_title: "\"What Goes Where?\" Live Directory",
+      aw_dir_subtitle: "Search 20+ everyday domestic waste materials for instant categorization",
+      aw_dir_placeholder: "Search item (e.g., battery, box, rinds)...",
+      quiz_title: "Citizen Segregation Speed Challenge",
+      quiz_subtitle: "Classify domestic waste streams instantaneously",
+      quiz_question_prompt: "Which bin does this belong to:",
+      prof_title: "Citizen Identity Vault",
+      prof_rank_label: "Current Rank:",
+      prof_role_label: "Role",
+      prof_email_label: "Email Address",
+      prof_name_label: "Full Name",
+      prof_lang_label: "Preferred Spoken Language",
+      prof_chg_pass: "Change Password",
+      prof_curr_pass: "Current Password",
+      prof_new_pass: "New Password",
+      btn_save_changes: "Save Changes",
+      gis_sector_1: "SECTOR 1: RESIDENTIAL DISTRICT",
+      gis_sector_2: "SECTOR 2: UNIVERSITY CAMPUS",
+      gis_sector_3: "SECTOR 3: METRO DOWNTOWN",
+      gis_sector_4: "SECTOR 4: INDUSTRIAL ZONE",
+      gis_central_depot: "CENTRAL DEPOT (0,0)",
+      gis_selected_loc: "SELECTED LOCATION",
+      sec_1_name: "Sector 1 (Residential)",
+      sec_2_name: "Sector 2 (University Campus)",
+      sec_3_name: "Sector 3 (Metro Downtown)",
+      sec_4_name: "Sector 4 (Industrial Zone)"
+    },
+    hi: {
+      nav_home: "मुख्य पृष्ठ",
+      nav_report: "समस्या दर्ज करें",
+      nav_pickup: "कचरा उठान बुक करें",
+      nav_tracking: "शिकायत स्थिति",
+      nav_admin: "कमांड सेंटर",
+      nav_awareness: "जागरूकता एवं क्विज",
+      nav_signin: "लॉग इन",
+      nav_signout: "लॉग आउट",
+      hero_tag: "नगरपालिका ठोस अपशिष्ट एवं लॉजिस्टिक्स प्रणाली",
+      hero_title: "स्मार्ट अपशिष्ट प्रबंधन एवं जीआईएस मैपिंग",
+      hero_desc: "नागरिकों के लिए एआई-सक्षम कचरा रिपोर्टिंग, डोरस्टेप संग्रह और वास्तविक समय जीआईएस फ्लीट ट्रैकिंग।",
+      btn_report_public: "सार्वजनिक कचरा रिपोर्ट करें",
+      btn_book_doorstep: "घर से उठान बुक करें",
+      btn_segregation_lab: "पृथक्करण प्रयोगशाला",
+      kpi_total: "कुल दर्ज मामले",
+      kpi_resolved: "सफलतापूर्वक निस्तारित",
+      kpi_diverted: "लैंडफिल से बचाया गया कचरा",
+      ai_vision_title: "एआई कंप्यूटर विज़न स्कैनर",
+      ai_vision_desc: "कचरे की फोटो अपलोड करें और हमारे क्लाइंट-साइड रंग एवं स्पेक्ट्रम क्लासिफायर से कचरे का प्रकार तुरंत पहचानें।",
+      btn_test_ai: "एआई स्कैनर चलाएं",
+      gis_fleet_title: "जीआईएस वाहन रूट अनुकूलन",
+      gis_fleet_desc: "अधिकारी लाइव जीआईएस रडार देख सकते हैं, हॉटस्पॉट पहचान सकते हैं और वाहनों के लिए सबसे छोटा रूट निकाल सकते हैं।",
+      btn_view_radar: "कमांड रडार देखें",
+      rep_title: "अपशिष्ट समस्या दर्ज करें",
+      rep_subtitle: "एआई कंप्यूटर विज़न एवं जीआईएस स्थान चयन",
+      rep_draft_active: "ड्राफ्ट सुरक्षित",
+      rep_type_label: "कचरे का प्रकार",
+      rep_type_placeholder: "चुनें या एआई से स्कैन करें...",
+      rep_type_overflow: "कूड़ेदान से बाहर बहता कचरा",
+      rep_type_road: "सड़क पर कचरा",
+      rep_type_missed: "कचरा गाड़ी नहीं आई",
+      rep_type_dump: "अवैध डंपिंग",
+      rep_type_haz: "खतरनाक रासायनिक कचरा",
+      rep_type_other: "अन्य",
+      rep_loc_label: "घटना का स्थान (नक्शे पर क्लिक करें)",
+      rep_gis_label: "नगर निगम जीआईएस पिन पिकर (नक्शे पर कहीं भी क्लिक करें)",
+      rep_prio_label: "प्राथमिकता स्तर",
+      rep_prio_low: "कम",
+      rep_prio_med: "मध्यम",
+      rep_prio_high: "उच्च",
+      rep_desc_label: "विस्तृत विवरण",
+      rep_desc_placeholder: "कचरे की मात्रा और स्थिति का विवरण लिखें...",
+      btn_submit_incident: "शिकायत सबमिट करें",
+      ai_lab_title: "एआई कंप्यूटर विज़न लैब",
+      ai_lab_subtitle: "त्वरित स्पेक्ट्रम विश्लेषण के लिए फोटो जोड़ें",
+      ai_lab_attach_prompt: "एआई स्कैनर शुरू करने के लिए फोटो जोड़ें",
+      ai_detection_label: "एआई द्वारा पहचाना गया",
+      ai_accept_prompt: "एआई वर्गीकरण स्वीकार करें:",
+      btn_apply: "लागू करें",
+      pik_title: "घर से कचरा उठान सेवा",
+      pik_subtitle: "जीआईएस वेपॉइंट द्वारा भारी, जैविक या ई-कचरे का संग्रह शेड्यूल करें",
+      pik_type_label: "कचरे की श्रेणी",
+      pik_type_placeholder: "श्रेणी चुनें...",
+      pik_type_wet: "गीला / जैविक",
+      pik_type_dry: "सूखा / पुनर्चक्रण योग्य",
+      pik_type_haz: "खतरनाक",
+      pik_type_ewaste: "ई-कचरा",
+      pik_type_bulk: "बड़ा / बगीचे का कचरा",
+      pik_addr_label: "संग्रह का पता (नक्शे पर क्लिक करें)",
+      pik_gis_label: "जीआईएस वेपॉइंट पिकर (स्थान चुनने के लिए क्लिक करें)",
+      pik_date_label: "उठान की तारीख",
+      pik_slot_label: "समय स्लॉट",
+      pik_slot_select: "समय स्लॉट चुनें...",
+      pik_slot_morning: "सुबह (8 AM - 11 AM)",
+      pik_slot_afternoon: "दोपहर (12 PM - 3 PM)",
+      pik_slot_evening: "शाम (4 PM - 7 PM)",
+      pik_slot_full: "स्लॉट पूर्ण (3/3 गाड़ियां बुक)। कृपया दूसरा स्लॉट चुनें।",
+      pik_slot_avail: "स्लॉट उपलब्ध",
+      pik_repeat_label: "आवृत्ति",
+      pik_repeat_onetime: "एक बार",
+      pik_repeat_weekly: "साप्ताहिक",
+      pik_repeat_monthly: "मासिक",
+      pik_notes_label: "विशेष निर्देश (वैकल्पिक)",
+      btn_sched_pickup: "कलेक्शन बुक करें",
+      trk_title: "शिकायत एवं उठान ट्रैकिंग",
+      trk_subtitle: "वास्तविक समय स्थिति, जीआईएस लोकेशन और फीडबैक रेटिंग",
+      trk_search_placeholder: "रिकॉर्ड खोजें...",
+      opt_all_status: "सभी स्थितियां",
+      opt_newest: "नवीनतम",
+      opt_oldest: "पुरातन",
+      step_submitted: "दर्ज किया गया",
+      step_assigned: "टीम आवंटित",
+      step_in_progress: "प्रगति पर",
+      step_resolved: "निस्तारित",
+      btn_inspect_gis: "जीआईएस नक्शे पर देखें",
+      badge_report: "सार्वजनिक रिपोर्ट",
+      badge_pickup: "घर से उठान",
+      rating_label: "निस्तारण रेटिंग:",
+      btn_resched: "समय बदलें",
+      btn_cancel: "रद्द करें",
+      btn_withdraw: "शिकायत वापस लें",
+      adm_title: "कमांड कंसोल एवं जीआईएस फ्लीट लॉजिस्टिक्स",
+      adm_subtitle: "इंटरैक्टिव रडार, टेलीमेट्री एवं वाहन रूट ऑप्टिमाइज़ेशन",
+      btn_load_demo: "डेमो डेटा लोड करें",
+      btn_purge_data: "डेटा साफ़ करें",
+      btn_export_csv: "सीएसवी निर्यात",
+      btn_print_report: "प्रिंट रिपोर्ट",
+      adm_kpi_total: "कुल मामले",
+      adm_kpi_pending: "लंबित मामले",
+      adm_kpi_overdue: "समय-सीमा पार (>3 दिन)",
+      adm_kpi_turnaround: "औसत समाधान समय",
+      adm_radar_title: "नगर निगम जीआईएस अपशिष्ट रडार",
+      adm_radar_subtitle: "ज़ूम करें, सभी सेक्टर देखें या एआई रूट ऑप्टिमाइज़र चलाएं",
+      btn_run_fleet_opt: "एआई वाहन रूट अनुकूलन चलाएं",
+      adm_chart_status: "स्थिति आवंटन",
+      adm_chart_types: "कचरे के प्रकार",
+      adm_chart_velocity: "7-दिवसीय गतिशीलता",
+      adm_tbl_title: "नगर निगम मास्टर रजिस्टर",
+      adm_tbl_id: "आईडी",
+      adm_tbl_type: "वर्गीकरण",
+      adm_tbl_loc: "स्थान",
+      adm_tbl_time: "दर्ज समय",
+      adm_tbl_status: "स्थिति",
+      adm_tbl_unit: "आवंटित टीम",
+      adm_tbl_action: "कार्रवाई",
+      btn_triage: "प्रबंधन करें",
+      aw_title: "चक्रीय संसाधन पृथक्करण केंद्र",
+      aw_subtitle: "स्रोत पर ही कचरे का सही अलगाव सुनिश्चित करें",
+      aw_daily_directive: "दैनिक नगरपालिका निर्देश",
+      aw_impact_title: "सामुदायिक प्रभाव",
+      aw_bin_standards: "मानक कूड़ेदान श्रेणियां",
+      aw_bin_wet: "गीला / जैविक",
+      aw_bin_dry: "सूखा / पुनर्चक्रण",
+      aw_bin_haz: "खतरनाक कचरा",
+      aw_bin_ewaste: "ई-कचरा",
+      aw_dir_title: "\"कौन सा कचरा कहां जाएगा?\" डायरेक्टरी",
+      aw_dir_subtitle: "रोजमर्रा की 20+ वस्तुओं का सही कूड़ेदान तुरंत खोजें",
+      aw_dir_placeholder: "वस्तु खोजें (उदा. बैटरी, डिब्बा, छिलके)...",
+      quiz_title: "नागरिक कचरा छंटाई चुनौती",
+      quiz_subtitle: "घरेलू कचरे को सही श्रेणी में डालने का परीक्षण करें",
+      quiz_question_prompt: "यह वस्तु किस कूड़ेदान में जाएगी:",
+      prof_title: "नागरिक पहचान केंद्र",
+      prof_rank_label: "वर्तमान स्तर:",
+      prof_role_label: "भूमिका",
+      prof_email_label: "ईमेल पता",
+      prof_name_label: "पूरा नाम",
+      prof_lang_label: "पसंदीदा भाषा",
+      prof_chg_pass: "पासवर्ड बदलें",
+      prof_curr_pass: "वर्तमान पासवर्ड",
+      prof_new_pass: "नया पासवर्ड",
+      btn_save_changes: "बदलाव सुरक्षित करें",
+      gis_sector_1: "सेक्टर 1: आवासीय क्षेत्र",
+      gis_sector_2: "सेक्टर 2: विश्वविद्यालय परिसर",
+      gis_sector_3: "सेक्टर 3: मेट्रो वाणिज्यिक केंद्र",
+      gis_sector_4: "सेक्टर 4: औद्योगिक क्षेत्र",
+      gis_central_depot: "केंद्रीय डिपो (0,0)",
+      gis_selected_loc: "चयनित स्थान",
+      sec_1_name: "सेक्टर 1 (आवासीय)",
+      sec_2_name: "सेक्टर 2 (विश्वविद्यालय परिसर)",
+      sec_3_name: "सेक्टर 3 (मेट्रो केंद्र)",
+      sec_4_name: "सेक्टर 4 (औद्योगिक क्षेत्र)"
+    },
+    es: {
+      nav_home: "Inicio",
+      nav_report: "Reportar Incidencia",
+      nav_pickup: "Solicitar Recogida",
+      nav_tracking: "Seguimiento",
+      nav_admin: "Centro de Mando",
+      nav_awareness: "Concienciación y Quiz",
+      nav_signin: "Iniciar Sesión",
+      nav_signout: "Cerrar Sesión",
+      hero_tag: "PLATAFORMA MUNICIPAL DE LOGÍSTICA DE RESIDUOS",
+      hero_title: "Gestión Inteligente de Residuos y Geocodificación GIS",
+      hero_desc: "Empoderando a los ciudadanos con reportes asistidos por IA, recogida selectiva puerta a puerta y telemetría de flotas en tiempo real.",
+      btn_report_public: "Reportar Residuos Públicos",
+      btn_book_doorstep: "Solicitar Recogida a Domicilio",
+      btn_segregation_lab: "Laboratorio de Separación",
+      kpi_total: "Total de Incidencias Registradas",
+      kpi_resolved: "Limpiezas Completadas",
+      kpi_diverted: "Residuos Desviados del Vertedero",
+      ai_vision_title: "Visión Artificial Neuronal por IA",
+      ai_vision_desc: "Suba fotos para activar nuestro clasificador de espectro de color en el cliente con cajas delimitadoras animadas para detectar residuos automáticamente.",
+      btn_test_ai: "Probar Escáner IA",
+      gis_fleet_title: "Optimización de Flotas por GIS",
+      gis_fleet_desc: "El personal municipal puede ver radares en vivo, identificar puntos críticos y ejecutar algoritmos de optimización de rutas.",
+      btn_view_radar: "Ver Radar de Mando",
+      rep_title: "Reportar Incidencia de Residuos",
+      rep_subtitle: "Visión Artificial por IA y Marcado GIS de Puntos",
+      rep_draft_active: "Borrador Activo",
+      rep_type_label: "Clasificación de Residuo",
+      rep_type_placeholder: "Seleccione o escanee con IA...",
+      rep_type_overflow: "Contenedor desbordado",
+      rep_type_road: "Basura en la vía pública",
+      rep_type_missed: "Recogida no realizada",
+      rep_type_dump: "Vertido ilegal",
+      rep_type_haz: "Vertido peligroso",
+      rep_type_other: "Otro",
+      rep_loc_label: "Ubicación (Haga clic en el mapa GIS)",
+      rep_gis_label: "Selector de Punto Municipal GIS (Haga clic en el mapa)",
+      rep_prio_label: "Prioridad de Gravedad",
+      rep_prio_low: "Baja",
+      rep_prio_med: "Media",
+      rep_prio_high: "Alta",
+      rep_desc_label: "Descripción",
+      rep_desc_placeholder: "Describa el volumen u obstrucción...",
+      btn_submit_incident: "Enviar Reporte de Incidencia",
+      ai_lab_title: "Laboratorio de Visión Artificial IA",
+      ai_lab_subtitle: "Adjunte una foto para análisis neural espectral instantáneo",
+      ai_lab_attach_prompt: "Adjunte una imagen para iniciar el escáner HUD",
+      ai_detection_label: "DETECCIÓN NEURONAL",
+      ai_accept_prompt: "¿Aceptar clasificación de IA:",
+      btn_apply: "Aplicar",
+      pik_title: "Recogida de Residuos a Domicilio",
+      pik_subtitle: "Programe la recogida de residuos voluminosos, orgánicos o peligrosos con coordenadas GIS",
+      pik_type_label: "Clasificación de Residuos",
+      pik_type_placeholder: "Seleccione categoría...",
+      pik_type_wet: "Orgánico / Húmedo",
+      pik_type_dry: "Reciclable / Seco",
+      pik_type_haz: "Peligroso",
+      pik_type_ewaste: "Residuos electrónicos",
+      pik_type_bulk: "Voluminosos / Jardinería",
+      pik_addr_label: "Dirección de Recogida (Haga clic en el mapa GIS)",
+      pik_gis_label: "Selector de Punto GIS (Pan/Zoom/Clic para marcar)",
+      pik_date_label: "Fecha de Recogida",
+      pik_slot_label: "Franja Horaria",
+      pik_slot_select: "Seleccione franja...",
+      pik_slot_morning: "Mañana (8 AM - 11 AM)",
+      pik_slot_afternoon: "Tarde (12 PM - 3 PM)",
+      pik_slot_evening: "Noche (4 PM - 7 PM)",
+      pik_slot_full: "Franja llena (3/3 camiones asignados). Seleccione otra.",
+      pik_slot_avail: "Franja Disponible",
+      pik_repeat_label: "Frecuencia",
+      pik_repeat_onetime: "Puntual",
+      pik_repeat_weekly: "Semanal",
+      pik_repeat_monthly: "Mensual",
+      pik_notes_label: "Instrucciones (Opcional)",
+      btn_sched_pickup: "Programar Recogida",
+      trk_title: "Seguimiento de Incidencias y Recogidas",
+      trk_subtitle: "Cronograma en tiempo real, coordenadas GIS y valoraciones",
+      trk_search_placeholder: "Buscar registros...",
+      opt_all_status: "Todos los Estados",
+      opt_newest: "Más Recientes",
+      opt_oldest: "Más Antiguos",
+      step_submitted: "Enviado",
+      step_assigned: "Asignado",
+      step_in_progress: "En Progreso",
+      step_resolved: "Resuelto",
+      btn_inspect_gis: "Inspeccionar en Mapa GIS",
+      badge_report: "REPORTE PÚBLICO",
+      badge_pickup: "RECOGIDA DOMICILIO",
+      rating_label: "Valoración del Servicio:",
+      btn_resched: "Reprogramar",
+      btn_cancel: "Cancelar",
+      btn_withdraw: "Retirar Reporte",
+      adm_title: "Consola de Mando y Logística de Flotas GIS",
+      adm_subtitle: "Radar geoespacial, telemetría y optimización de rutas TSP",
+      btn_load_demo: "Cargar Datos Demo",
+      btn_purge_data: "Purgar Datos",
+      btn_export_csv: "Exportar CSV",
+      btn_print_report: "Imprimir Informe",
+      adm_kpi_total: "Total Registros",
+      adm_kpi_pending: "Pendientes",
+      adm_kpi_overdue: "SLA Vencido (>3 Días)",
+      adm_kpi_turnaround: "Tiempo Medio de Resolución",
+      adm_radar_title: "Radar GIS Municipal de Incidencias",
+      adm_radar_subtitle: "Navegue por los 4 sectores o ejecute el Optimizador de Rutas",
+      btn_run_fleet_opt: "Ejecutar Optimización de Rutas IA",
+      adm_chart_status: "Distribución de Estados",
+      adm_chart_types: "Tipos de Incidencias",
+      adm_chart_velocity: "Velocidad de Despacho (7 Días)",
+      adm_tbl_title: "Registro Maestro de Operaciones Municipales",
+      adm_tbl_id: "ID",
+      adm_tbl_type: "Clasificación",
+      adm_tbl_loc: "Ubicación",
+      adm_tbl_time: "Registrado",
+      adm_tbl_status: "Estado",
+      adm_tbl_unit: "Unidad Asignada",
+      adm_tbl_action: "Acción",
+      btn_triage: "Gestionar",
+      aw_title: "Laboratorio de Economía Circular y Separación",
+      aw_subtitle: "Elimine la contaminación de residuos desde el origen",
+      aw_daily_directive: "Directiva Municipal del Día",
+      aw_impact_title: "Impacto Comunitario",
+      aw_bin_standards: "Estándares de Contenedores por Colores",
+      aw_bin_wet: "Orgánico / Húmedo",
+      aw_bin_dry: "Reciclable / Seco",
+      aw_bin_haz: "Residuo Peligroso",
+      aw_bin_ewaste: "Residuo Electrónico",
+      aw_dir_title: "Directorio en Vivo \"¿Dónde va cada cosa?\"",
+      aw_dir_subtitle: "Consulte más de 20 residuos comunes para su clasificación adecuada",
+      aw_dir_placeholder: "Buscar elemento (ej. batería, caja, restos)...",
+      quiz_title: "Desafío Ciudadano de Separación",
+      quiz_subtitle: "Ponga a prueba su velocidad para clasificar residuos domésticos",
+      quiz_question_prompt: "¿A qué contenedor pertenece este residuo:",
+      prof_title: "Bóveda de Identidad Ciudadana",
+      prof_rank_label: "Rango Actual:",
+      prof_role_label: "Rol",
+      prof_email_label: "Correo Electrónico",
+      prof_name_label: "Nombre Completo",
+      prof_lang_label: "Idioma de Preferencia",
+      prof_chg_pass: "Cambiar Contraseña",
+      prof_curr_pass: "Contraseña Actual",
+      prof_new_pass: "Nueva Contraseña",
+      btn_save_changes: "Guardar Cambios",
+      gis_sector_1: "SECTOR 1: DISTRITO RESIDENCIAL",
+      gis_sector_2: "SECTOR 2: CAMPUS UNIVERSITARIO",
+      gis_sector_3: "SECTOR 3: CENTRO URBANO",
+      gis_sector_4: "SECTOR 4: POLÍGONO INDUSTRIAL",
+      gis_central_depot: "DEPÓSITO CENTRAL (0,0)",
+      gis_selected_loc: "UBICACIÓN SELECCIONADA",
+      sec_1_name: "Sector 1 (Residencial)",
+      sec_2_name: "Sector 2 (Campus Universitario)",
+      sec_3_name: "Sector 3 (Centro Urbano)",
+      sec_4_name: "Sector 4 (Polígono Industrial)"
+    },
+    ar: {
+      nav_home: "الرئيسية",
+      nav_report: "الإبلاغ عن مخالفة",
+      nav_pickup: "طلب جمع النفايات",
+      nav_tracking: "متابعة البلاغات",
+      nav_admin: "مركز القيادة",
+      nav_awareness: "التوعية والاختبار",
+      nav_signin: "تسجيل الدخول",
+      nav_signout: "تسجيل الخروج",
+      hero_tag: "منظومة الخدمات اللوجستية الذكية للبلدية",
+      hero_title: "الإدارة الذكية للنفايات وتحديد المواقع الجغرافية",
+      hero_desc: "تمكين المواطنين من الإبلاغ المدعوم بالذكاء الاصطناعي وجدولة النقل الميداني.",
+      btn_report_public: "إبلاغ عن تراكم نفايات",
+      btn_book_doorstep: "طلب استلام منزلي",
+      btn_segregation_lab: "مختبر الفرز",
+      kpi_total: "إجمالي البلاغات المسجلة",
+      kpi_resolved: "العمليات المنجزة بنجاح",
+      kpi_diverted: "النفايات المحولة عن المكبات",
+      btn_submit_incident: "إرسال البلاغ",
+      btn_sched_pickup: "تأكيد موعد الاستلام"
+    },
+    bn: {
+      nav_home: "মূলপাতা",
+      nav_report: "অভিযোগ জানান",
+      nav_pickup: "বর্জ্য সংগ্রহ বুক করুন",
+      nav_tracking: "ট্র্যাকিং",
+      nav_admin: "কমান্ড সেন্টার",
+      nav_awareness: "সচেতনতা ও কুইজ",
+      nav_signin: "লগ ইন",
+      nav_signout: "লগ আউট",
+      hero_tag: "পৌর বর্জ্য ও স্মার্ট লজিস্টিকস প্ল্যাটফর্ম",
+      hero_title: "স্মার্ট বর্জ্য ব্যবস্থাপনা ও জিআইএস ম্যাপিং",
+      hero_desc: "নাগরিকদের জন্য এআই-চালিত বর্জ্য রিপোর্টিং এবং সরাসরি সংগ্রহ পরিষেবা।",
+      btn_report_public: "বর্জ্য রিপোর্ট করুন",
+      btn_book_doorstep: "বাড়ি থেকে সংগ্রহ বুক করুন",
+      btn_segregation_lab: "বর্জ্য পৃথকীকরণ ল্যাব",
+      kpi_total: "মোট নথিভুক্ত ঘটনা",
+      kpi_resolved: "সফলভাবে সম্পন্ন",
+      kpi_diverted: "পুনর্ব্যবহারযোগ্য বর্জ্য",
+      btn_submit_incident: "অভিযোগ জমা দিন",
+      btn_sched_pickup: "সংগ্রহ শিডিউল করুন"
+    },
+    zh: {
+      nav_home: "首页",
+      nav_report: "事件上报",
+      nav_pickup: "预约上门回收",
+      nav_tracking: "进度追踪",
+      nav_admin: "指挥调度中心",
+      nav_awareness: "垃圾分类与测验",
+      nav_signin: "登录",
+      nav_signout: "退出登录",
+      hero_tag: "市政固体废物与智能物流操作系统",
+      hero_title: "智能固废调度与GIS空间地理编码",
+      hero_desc: "为市民提供AI视觉识别垃圾上报、定点预约回收及实时车辆路径规划。",
+      btn_report_public: "上报公共垃圾事件",
+      btn_book_doorstep: "预约上门清运",
+      btn_segregation_lab: "分类实训实验室",
+      kpi_total: "接收事件总量",
+      kpi_resolved: "已完成处置闭环",
+      kpi_diverted: "避免填埋垃圾量",
+      btn_submit_incident: "提交处理单",
+      btn_sched_pickup: "确认清运排程"
+    },
+    nl: {
+      nav_home: "Startpagina",
+      nav_report: "Melding Maken",
+      nav_pickup: "Ophaalafspraak",
+      nav_tracking: "Status Volgen",
+      nav_admin: "Meldkamer",
+      nav_awareness: "Gids & Quiz",
+      nav_signin: "Inloggen",
+      nav_signout: "Uitloggen",
+      hero_tag: "MUNICIPALE LOGISTIEKE AUTOMATISERING",
+      hero_title: "Slim Afvalbeheer & GIS-Routering",
+      hero_desc: "Burgerparticipatie met AI-fotodetectie en realtime vuilniswagentelemetrie.",
+      btn_report_public: "Zwerfvuil Melden",
+      btn_book_doorstep: "Ophaalbeurt Boeken",
+      btn_segregation_lab: "Scheidingslab",
+      kpi_total: "Totaal Meldingen",
+      kpi_resolved: "Afgeronde Schoonmaakacties",
+      kpi_diverted: "Afval Afgewend van Stortplaats",
+      btn_submit_incident: "Melding Indienen",
+      btn_sched_pickup: "Afspraak Bevestigen"
+    },
+    fr: {
+      nav_home: "Accueil",
+      nav_report: "Signaler Incident",
+      nav_pickup: "Demander Collecte",
+      nav_tracking: "Suivi des Dossiers",
+      nav_admin: "Poste de Commandement",
+      nav_awareness: "Sensibilisation & Quiz",
+      nav_signin: "Connexion",
+      nav_signout: "Déconnexion",
+      hero_tag: "PLATEFORME MUNICIPALE DE LOGISTIQUE CIRCULAIRE",
+      hero_title: "Gestion Intelligente des Déchets & Géocodage SIG",
+      hero_desc: "Signalement citoyen assisté par vision IA et optimisation de tournées des bennes.",
+      btn_report_public: "Signaler un Dépôt Sauvage",
+      btn_book_doorstep: "Planifier un Enlèvement",
+      btn_segregation_lab: "Atelier de Tri",
+      kpi_total: "Total Incidents Traités",
+      kpi_resolved: "Interventions Clôturées",
+      kpi_diverted: "Déchets Détournés des Décharges",
+      btn_submit_incident: "Envoyer la Réclamation",
+      btn_sched_pickup: "Valider l'Enlèvement"
+    },
+    de: {
+      nav_home: "Startseite",
+      nav_report: "Mangel Melden",
+      nav_pickup: "Abholung Buchen",
+      nav_tracking: "Statusverfolgung",
+      nav_admin: "Leitstelle",
+      nav_awareness: "Wissen & Quiz",
+      nav_signin: "Anmelden",
+      nav_signout: "Abmelden",
+      hero_tag: "KOMMUNALE ENTSORGUNGS- &amp; LOGISTIKPLATTFORM",
+      hero_title: "Intelligente Abfalllogistik &amp; GIS-Standortüberwachung",
+      hero_desc: "Bürgerportal mit KI-Bildanalyse, digitaler Sperrmüllbuchung und dynamischer Tourenplanung.",
+      btn_report_public: "Wilden Müll Melden",
+      btn_book_doorstep: "Abholung Terminieren",
+      btn_segregation_lab: "Mülltrennungs-Labor",
+      kpi_total: "Eingegangene Meldungen",
+      kpi_resolved: "Erfolgreich Beseitigt",
+      kpi_diverted: "Vom Deponieren Abgewendet",
+      btn_submit_incident: "Meldung Absenden",
+      btn_sched_pickup: "Termin Verbindlich Buchen"
+    },
+    it: {
+      nav_home: "Home",
+      nav_report: "Segnala Rifiuti",
+      nav_pickup: "Prenota Ritiro",
+      nav_tracking: "Stato Segnalazioni",
+      nav_admin: "Centrale Operativa",
+      nav_awareness: "Guida &amp; Quiz",
+      nav_signin: "Accedi",
+      nav_signout: "Esci",
+      hero_tag: "PIATTAFORMA MUNICIPALE DI GESTIONE RIFIUTI",
+      hero_title: "Gestione Intelligente dei Rifiuti &amp; Geocodifica GIS",
+      hero_desc: "Strumenti per i cittadini con riconoscimento immagini IA e monitoraggio mezzi in tempo reale.",
+      btn_report_public: "Segnala Discarica Abusiva",
+      btn_book_doorstep: "Prenota Ritiro Ingombranti",
+      btn_segregation_lab: "Laboratorio Differenziata",
+      kpi_total: "Segnalazioni Totali",
+      kpi_resolved: "Bonifiche Completate",
+      kpi_diverted: "Rifiuti Sottratti alla Discarica",
+      btn_submit_incident: "Invia Segnalazione",
+      btn_sched_pickup: "Conferma Ritiro"
+    },
+    ja: {
+      nav_home: "ホーム",
+      nav_report: "投棄報告",
+      nav_pickup: "戸別回収予約",
+      nav_tracking: "進捗追跡",
+      nav_admin: "運行司令室",
+      nav_awareness: "分別知識＆クイズ",
+      nav_signin: "ログイン",
+      nav_signout: "ログアウト",
+      hero_tag: "自治体スマート環境ロジスティクスOS",
+      hero_title: "インテリジェント廃棄物収集・GIS地理情報基盤",
+      hero_desc: "市民参加型AI画像診断通報、戸別回収スケジューラ、収集車巡回ルート最適化。",
+      btn_report_public: "不法投棄を通報する",
+      btn_book_doorstep: "戸別回収を予約する",
+      btn_segregation_lab: "資源分別ラボ",
+      kpi_total: "総通報受付件数",
+      kpi_resolved: "清掃対応完了数",
+      kpi_diverted: "最終処分場削減重量",
+      btn_submit_incident: "通報データを送信",
+      btn_sched_pickup: "予約を確定する"
+    },
+    kn: {
+      nav_home: "ಮುಖಪುಟ",
+      nav_report: "ದೂರು ದಾಖಲಿಸಿ",
+      nav_pickup: "ತ್ಯಾಜ್ಯ ಸಂಗ್ರಹ ಬುಕಿಂಗ್",
+      nav_tracking: "ಸ್ಥಿತಿ ಪರಿಶೀಲನೆ",
+      nav_admin: "ಆಡಳಿತ ಕೇಂದ್ರ",
+      nav_awareness: "ಅರಿವು ಮತ್ತು ರಸಪ್ರಶ್ನೆ",
+      nav_signin: "ಸೈನ್ ಇನ್",
+      nav_signout: "ಸೈನ್ ಔಟ್",
+      hero_tag: "ನಗರ ಪಾಲಿಕೆ ತ್ಯಾಜ್ಯ ವಿಲೇವಾರಿ ವೇದಿಕೆ",
+      hero_title: "ಸ್ಮಾರ್ಟ್ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ ಮತ್ತು ಜಿಐಎಸ್ ಮ್ಯಾಪಿಂಗ್",
+      hero_desc: "ಎಐ ತಂತ್ರಜ್ಞಾನ ಆಧಾರಿತ ಕಸದ ವರದಿ ಮತ್ತು ಮನೆ ಬಾಗಿಲಿನ ಸಂಗ್ರಹ ಸೇವೆ.",
+      btn_report_public: "ಕಸದ ದೂರು ದಾಖಲಿಸಿ",
+      btn_book_doorstep: "ಸಂಗ್ರಹ ಬುಕ್ ಮಾಡಿ",
+      btn_segregation_lab: "ತ್ಯಾಜ್ಯ ವಿಂಗಡಣಾ ಕೇಂದ್ರ",
+      kpi_total: "ಒಟ್ಟು ದಾಖಲಾದ ಪ್ರಕರಣಗಳು",
+      kpi_resolved: "ಪರಿಹರಿಸಲಾದ ದೂರುಗಳು",
+      kpi_diverted: "ಮರುಬಳಕೆಯಾದ ತ್ಯಾಜ್ಯ",
+      btn_submit_incident: "ದೂರು ಸಲ್ಲಿಸಿ",
+      btn_sched_pickup: "ಬುಕಿಂಗ್ ಖಚಿತಪಡಿಸಿ"
+    },
+    la: {
+      nav_home: "Initium",
+      nav_report: "Purgamenta Nuntiare",
+      nav_pickup: "Collectionem Petere",
+      nav_tracking: "Investigationes",
+      nav_admin: "Centrum Imperii",
+      nav_awareness: "Doctrina &amp; Quaestiones",
+      nav_signin: "Inire",
+      nav_signout: "Exire",
+      hero_tag: "CIVITATIS CURA ET LOGISTICA",
+      hero_title: "Gubernatio Purgamentorum et Tabula Geographica",
+      hero_desc: "Civibus subsidium per intelligentiam artificialem ad urbem mundam servandam.",
+      btn_report_public: "Purgamenta Publica Notare",
+      btn_book_doorstep: "Ad Ianuam Petere",
+      btn_segregation_lab: "Locus Separationis",
+      kpi_total: "Omnia Nuntiata",
+      kpi_resolved: "Mundata Perfecta",
+      kpi_diverted: "Servatum a Fovea",
+      btn_submit_incident: "Nuntium Mittere",
+      btn_sched_pickup: "Comprobare"
+    },
+    mr: {
+      nav_home: "मुख्यपृष्ठ",
+      nav_report: "तक्रार नोंदवा",
+      nav_pickup: "कचरा उचल बुक करा",
+      nav_tracking: "स्थिती ट्रॅक करा",
+      nav_admin: "कमांड सेंटर",
+      nav_awareness: "जागरूकता आणि क्विझ",
+      nav_signin: "लॉग इन",
+      nav_signout: "लॉग आउट",
+      hero_tag: "महानगरपालिका घनकचरा व्यवस्थापन प्रणाली",
+      hero_title: "स्मार्ट कचरा नियोजन आणि जीआयएस मॅपिंग",
+      hero_desc: "नागरिकांसाठी एआय आधारित तक्रार निवारण आणि घरपोच कचरा संकलन सेवा.",
+      btn_report_public: "कचऱ्याची तक्रार नोंदवा",
+      btn_book_doorstep: "कचरा संकलन बुक करा",
+      btn_segregation_lab: "वर्गीकरण केंद्र",
+      kpi_total: "एकूण नोंदवलेल्या तक्रारी",
+      kpi_resolved: "यशस्वीरित्या पूर्ण",
+      kpi_diverted: "पुनर्प्रक्रिया केलेला कचरा",
+      btn_submit_incident: "तक्रार सबमिट करा",
+      btn_sched_pickup: "वेळ निश्चित करा"
+    },
+    no: {
+      nav_home: "Hjem",
+      nav_report: "Meld Avvik",
+      nav_pickup: "Bestill Henting",
+      nav_tracking: "Følg Saken",
+      nav_admin: "Kommando-Sentral",
+      nav_awareness: "Kildesortering",
+      nav_signin: "Logg Inn",
+      nav_signout: "Logg Ut",
+      hero_tag: "KOMMUNALT AVFALLS- &amp; LOGISTIKKSYSTEM",
+      hero_title: "Smart Renovasjon &amp; GIS-Ruteplanlegging",
+      hero_desc: "Innbyggerportal med AI-assistert feilrapportering og sanntids flåtestyring.",
+      btn_report_public: "Meld Forsøpling",
+      btn_book_doorstep: "Bestill Avfallshenting",
+      btn_segregation_lab: "Sorteringslab",
+      kpi_total: "Meldte Avvik Totalt",
+      kpi_resolved: "Gjennomførte Tiltak",
+      kpi_diverted: "Avfall Skånet Deponi",
+      btn_submit_incident: "Send Inn Melding",
+      btn_sched_pickup: "Bekreft Henting"
+    },
+    or: {
+      nav_home: "ମୂଳପୃଷ୍ଠା",
+      nav_report: "ଅଭିଯୋଗ କରନ୍ତୁ",
+      nav_pickup: "ଅଳିଆ ସଂଗ୍ରହ ବୁକିଂ",
+      nav_tracking: "ଟ୍ରାକିଂ",
+      nav_admin: "କମାଣ୍ଡ ସେଣ୍ଟର",
+      nav_awareness: "ସଚେତନତା ଓ କୁଇଜ୍",
+      nav_signin: "ଲଗ୍ ଇନ୍",
+      nav_signout: "ଲଗ୍ ଆଉଟ୍",
+      hero_tag: "ପୌରପାଳିକା ବର୍ଜ୍ୟବସ୍ତୁ ପରିଚାଳନା",
+      hero_title: "ସ୍ମାର୍ଟ ଅଳିଆ ପରିଚାଳନା ଓ ଜିଆଇଏସ୍ ମ୍ୟାପିଂ",
+      hero_desc: "ଏଆଇ ଆଧାରିତ ବର୍ଜ୍ୟବସ୍ତୁ ରିପୋର୍ଟ ଏବଂ ଘରୁ ସଂଗ୍ରହ ବ୍ୟବସ୍ଥା।",
+      btn_report_public: "ଅଳିଆ ରିପୋର୍ଟ କରନ୍ତୁ",
+      btn_book_doorstep: "ସଂଗ୍ରହ ବୁକ୍ କରନ୍ତୁ",
+      btn_segregation_lab: "ପୃଥକୀକରଣ କେନ୍ଦ୍ର",
+      kpi_total: "ମୋଟ ଦାଖଲ ଅଭିଯୋଗ",
+      kpi_resolved: "ସମାଧାନ ହୋଇଥିବା ମାମଲା",
+      kpi_diverted: "ପୁନଃଚକ୍ରଣ ବର୍ଜ୍ୟ",
+      btn_submit_incident: "ଦାଖଲ କରନ୍ତୁ",
+      btn_sched_pickup: "ନିଶ୍ଚିତ କରନ୍ତୁ"
+    },
+    pt: {
+      nav_home: "Início",
+      nav_report: "Reportar Problema",
+      nav_pickup: "Agendar Coleta",
+      nav_tracking: "Rastreamento",
+      nav_admin: "Centro de Comando",
+      nav_awareness: "Educação &amp; Quiz",
+      nav_signin: "Entrar",
+      nav_signout: "Sair",
+      hero_tag: "PLATAFORMA MUNICIPAL DE LOGÍSTICA DE RESÍDUOS",
+      hero_title: "Gestão Inteligente de Resíduos &amp; Geocodificação GIS",
+      hero_desc: "Relatórios assistidos por IA e otimização de rotas de coleta seletiva porta a porta.",
+      btn_report_public: "Reportar Descarte Ilegal",
+      btn_book_doorstep: "Agendar Coleta Domiciliar",
+      btn_segregation_lab: "Laboratório de Separação",
+      kpi_total: "Total de Ocorrências",
+      kpi_resolved: "Limpezas Concluídas",
+      kpi_diverted: "Resíduos Desviados de Aterros",
+      btn_submit_incident: "Enviar Ocorrência",
+      btn_sched_pickup: "Confirmar Agendamento"
+    },
+    qu: {
+      nav_home: "Qallariy",
+      nav_report: "Qupata Willay",
+      nav_pickup: "Qupa Pallayta Mañakuy",
+      nav_tracking: "Qatipay",
+      nav_admin: "Kamachiq Wasin",
+      nav_awareness: "Yachay &amp; Tapukuy",
+      nav_signin: "Yaykuy",
+      nav_signout: "Lluqsiy",
+      hero_tag: "LLAQTA LLIKALLA ALLIN KAWSAYPAQ",
+      hero_title: "Allin Qupa Kamachiy &amp; Saywiti GIS",
+      hero_desc: "Llaqtamasi yanapay AI rikuywan, wasimanta qupa pallaywan.",
+      btn_report_public: "Hawapi Qupata Willay",
+      btn_book_doorstep: "Wasimanta Pallayta Mañay",
+      btn_segregation_lab: "Taqay Yachana Wasi",
+      kpi_total: "Tukuy Willasqakuna",
+      kpi_resolved: "Tukusqa Pichaykuna",
+      kpi_diverted: "Qupakunamanta Qespisqa",
+      btn_submit_incident: "Willayta Kachay",
+      btn_sched_pickup: "Arí Niy"
+    },
+    ru: {
+      nav_home: "Главная",
+      nav_report: "Сообщить о Свалке",
+      nav_pickup: "Заказ Вывоза",
+      nav_tracking: "Отслеживание",
+      nav_admin: "Командный Центр",
+      nav_awareness: "Эко-Гид и Тест",
+      nav_signin: "Войти",
+      nav_signout: "Выйти",
+      hero_tag: "МУНИЦИПАЛЬНАЯ ЛОГИСТИЧЕСКАЯ ОС ПО УТИЛИЗАЦИИ ТБО",
+      hero_title: "Умное Управление Отходами и ГИС-Маршрутизация",
+      hero_desc: "Нейросетевая классификация мусора по фото и автоматический расчет маршрутов спецтехники.",
+      btn_report_public: "Зафиксировать Мусор",
+      btn_book_doorstep: "Заказать Вывоз КГО",
+      btn_segregation_lab: "Лаборатория Сортировки",
+      kpi_total: "Всего Заявок Обработано",
+      kpi_resolved: "Ликвидировано Навалов",
+      kpi_diverted: "Не Допущено на Полигоны",
+      btn_submit_incident: "Отправить Обращение",
+      btn_sched_pickup: "Подтвердить График"
+    },
+    ta: {
+      nav_home: "முகப்பு",
+      nav_report: "புகார் அளிக்கவும்",
+      nav_pickup: "குப்பை சேகரிப்பு பதிவு",
+      nav_tracking: "கண்காணிப்பு",
+      nav_admin: "கட்டளை மையம்",
+      nav_awareness: "விழிப்புணர்வு வினாடிவினா",
+      nav_signin: "உள்நுழைக",
+      nav_signout: "வெளியேறுக",
+      hero_tag: "நகராட்சி கழிவு மேலாண்மை அமைப்பு",
+      hero_title: "ஸ்மார்ட் கழிவு மேலாண்மை &amp; ஜிஐஎஸ் வரைபடம்",
+      hero_desc: "செயற்கை நுண்ணறிவு அடிப்படையிலான கழிவு புகார் மற்றும் வீட்டு வாசலில் சேகரிப்பு முறை.",
+      btn_report_public: "குப்பையை புகாரளி",
+      btn_book_doorstep: "சேகரிப்பை பதிவு செய்க",
+      btn_segregation_lab: "கழிவு பிரிப்பு மையம்",
+      kpi_total: "பதிவான மொத்த புகார்கள்",
+      kpi_resolved: "தீர்க்கப்பட்டவை",
+      kpi_diverted: "மறுசுழற்சி செய்யப்பட்டவை",
+      btn_submit_incident: "புகாரை சமர்ப்பிக்கவும்",
+      btn_sched_pickup: "பதிவை உறுதிசெய்க"
+    },
+    uk: {
+      nav_home: "Головна",
+      nav_report: "Повідомити про Сміття",
+      nav_pickup: "Замовити Вивіз",
+      nav_tracking: "Моніторинг Заявок",
+      nav_admin: "Центр Керування",
+      nav_awareness: "Сортування та Тест",
+      nav_signin: "Увійти",
+      nav_signout: "Вийти",
+      hero_tag: "МУНІЦИПАЛЬНА СИСТЕМА УПРАВЛІННЯ ВІДХОДАМИ",
+      hero_title: "Розумна Логістика Відходів та ГІС-Маршрутизація",
+      hero_desc: "ШІ-аналіз фотографій сміття та геопросторова диспетчеризація спецтранспорту.",
+      btn_report_public: "Повідомити про Смітник",
+      btn_book_doorstep: "Замовити Вивіз Відходів",
+      btn_segregation_lab: "Лабораторія Сортування",
+      kpi_total: "Всього Заявок",
+      kpi_resolved: "Ліквідовано Смітників",
+      kpi_diverted: "Врятовано від Полігонів",
+      btn_submit_incident: "Надіслати Скаргу",
+      btn_sched_pickup: "Підтвердити Вивіз"
+    },
+    vi: {
+      nav_home: "Trang chủ",
+      nav_report: "Báo cáo rác",
+      nav_pickup: "Đặt lịch thu gom",
+      nav_tracking: "Theo dõi tiến độ",
+      nav_admin: "Trung tâm điều hành",
+      nav_awareness: "Phân loại &amp; Đố vui",
+      nav_signin: "Đăng nhập",
+      nav_signout: "Đăng xuất",
+      hero_tag: "HỆ THỐNG ĐIỀU PHỐI RÁC THẢI ĐÔ THỊ",
+      hero_title: "Quản Lý Rác Thông Minh &amp; Định Vị Bản Đồ GIS",
+      hero_desc: "Hỗ trợ người dân phân tích rác bằng AI và tối ưu hóa lộ trình xe rác theo thời gian thực.",
+      btn_report_public: "Báo Rác Công Cộng",
+      btn_book_doorstep: "Đặt Thu Gom Tận Nơi",
+      btn_segregation_lab: "Góc Phân Loại Rác",
+      kpi_total: "Tổng Sự Cố Tiếp Nhận",
+      kpi_resolved: "Đã Dọn Dẹp Thành Công",
+      kpi_diverted: "Rác Tái Chế Thu Được",
+      btn_submit_incident: "Gửi Báo Cáo",
+      btn_sched_pickup: "Xác Nhận Lịch Hẹn"
+    },
+    cy: {
+      nav_home: "Hafan",
+      nav_report: "Adrodd Gwastraff",
+      nav_pickup: "Trefnu Casgliad",
+      nav_tracking: "Tracio Problemau",
+      nav_admin: "Canolfan Reoli",
+      nav_awareness: "Ymwybyddiaeth a Chwis",
+      nav_signin: "Mewngofnodi",
+      nav_signout: "Allgofnodi",
+      hero_tag: "SYSTEM REOLI GWASTRAFF DINESIG",
+      hero_title: "Rheoli Gwastraff Deallus a Mapio GIS",
+      hero_desc: "Grymuso dinasyddion gydag adroddiadau AI a lwybrau casglu cerbydau carthion.",
+      btn_report_public: "Adrodd Sbwriel Cyhoeddus",
+      btn_book_doorstep: "Archebu Casgliad Cartref",
+      btn_segregation_lab: "Labordy Didoli",
+      kpi_total: "Cyfanswm yr Achosion",
+      kpi_resolved: "Wedi'u Datrys",
+      kpi_diverted: "Gwastraff a Ailgyfeiriwyd",
+      btn_submit_incident: "Cyflwyno Cwyn",
+      btn_sched_pickup: "Cadarnhau Casgliad"
+    },
+    xh: {
+      nav_home: "Ikhaya",
+      nav_report: "Xela Inkunkuma",
+      nav_pickup: "Cwangcisa Ukuthuthwa",
+      nav_tracking: "Ukulandelela",
+      nav_admin: "Iziko Lolawulo",
+      nav_awareness: "Ukwazisa &amp; Imibuzo",
+      nav_signin: "Ngena",
+      nav_signout: "Phuma",
+      hero_tag: "INKQUBO YOLAWULO LWENKUNKUMA",
+      hero_title: "Ulawulo Lwenkunkuma Olukrelekrele &amp; Imaphu ye-GIS",
+      hero_desc: "Ukunceda abahlali ngokuxela inkunkuma kusetyenziswa i-AI nokuthuthwa kwayo emakhaya.",
+      btn_report_public: "Xela Inkunkuma Esidlangalaleni",
+      btn_book_doorstep: "Cela Ukuthuthwa Emnyango",
+      btn_segregation_lab: "Ukwahlula Inkunkuma",
+      kpi_total: "Zonke Izikhalazo",
+      kpi_resolved: "Ezicociweyo",
+      kpi_diverted: "Inkunkuma Ehlaziyiweyo",
+      btn_submit_incident: "Thumela Isikhalazo",
+      btn_sched_pickup: "Qinisekisa Usuku"
+    },
+    yo: {
+      nav_home: "Ilé",
+      nav_report: "Ròyìn Àdánù",
+      nav_pickup: "Gba Ìkójọpọ̀",
+      nav_tracking: "Tẹ̀lé Ìtẹ̀síwájú",
+      nav_admin: "Ibùdó Àṣẹ",
+      nav_awareness: "Ìmọ̀ &amp; Ìdánwò",
+      nav_signin: "Wọlé",
+      nav_signout: "Jáde",
+      hero_tag: "ÈTÒ ÌTỌ́JÚ ÀTI ÌKÓJỌPỌ̀ DỌ̀TÍ ÌLÚ",
+      hero_title: "Ìṣàkóso Pàntírí Pẹ̀lú Àwòrán Ilẹ̀ GIS",
+      hero_desc: "Fífún àwọn ará ìlú ní agbára láti ròyìn pàntírí pẹ̀lú AI àti ìkójọpọ̀ ilé-dé-ilé.",
+      btn_report_public: "Ròyìn Pàntírí Gbàngbà",
+      btn_book_doorstep: "Béèrè Ìkójọpọ̀ Ilé",
+      btn_segregation_lab: "Iyàwòrán Ìpínyà Pàntírí",
+      kpi_total: "Àpapọ̀ Ìròyìn",
+      kpi_resolved: "Èyí tí a ti túnṣe",
+      kpi_diverted: "Pàntírí tí a túnlò",
+      btn_submit_incident: "Firanṣẹ Ẹdun",
+      btn_sched_pickup: "Jẹrisi Akoko"
+    },
+    zu: {
+      nav_home: "Ikhaya",
+      nav_report: "Bika Udoti",
+      nav_pickup: "Hlela Ukulandwa",
+      nav_tracking: "Landelela",
+      nav_admin: "Isikhungo Sokulawula",
+      nav_awareness: "Ukuqwashisa &amp; Imibuzo",
+      nav_signin: "Ngena",
+      nav_signout: "Phuma",
+      hero_tag: "UHLELO LOKULAWULWA KWEZINTO ZIKAHULUMENI",
+      hero_title: "Ukuphathwa Kukadoti Ngobuchule &amp; Imephu ye-GIS",
+      hero_desc: "Ukusiza izakhamuzi ngokubika udoti kusetshenziswa i-AI nokulandwa kukadoti emizini.",
+      btn_report_public: "Bika Udoti Osendleleni",
+      btn_book_doorstep: "Hlela Ukulandwa Emzini",
+      btn_segregation_lab: "Indawo Yokuhlunga",
+      kpi_total: "Izikhalo Eziphelele",
+      kpi_resolved: "Okulungisiwe",
+      kpi_diverted: "Udoti Osetshenziswe Kabusha",
+      btn_submit_incident: "Thumela Isikhalazo",
+      btn_sched_pickup: "Qinisekisa Isikhathi"
+    }
+  },
+
+  init() {
+    const saved = dbGet("ecopulse_lang_v2", null);
+    if (saved && this.languages.some(l => l.code === saved)) {
+      this.currentLang = saved;
+    } else {
+      this.currentLang = "en";
+    }
+    this.populateSelectors();
+  },
+
+  populateSelectors() {
+    const headerSel = document.getElementById("lang-selector-header");
+    if (headerSel) {
+      headerSel.innerHTML = this.languages.map(l =>
+        `<option value="${l.code}" ${l.code === this.currentLang ? "selected" : ""}>${escapeHTML(l.label)}</option>`
+      ).join("");
+    }
+  },
+
+  setLang(lang) {
+    if (!this.languages.some(l => l.code === lang)) return;
+    this.currentLang = lang;
+    dbSet("ecopulse_lang_v2", lang);
+
+    const user = Auth.getCurrentUser();
+    if (user) {
+      const users = Store.getUsers();
+      const u = users.find(x => x.id === user.id);
+      if (u) {
+        u.preferredLang = lang;
+        Store.setUsers(users);
+      }
+      user.preferredLang = lang;
+      Store.setSession(user);
+    }
+
+    const sel = document.getElementById("lang-selector-header");
+    if (sel && sel.value !== lang) sel.value = lang;
+
+    Router.renderCurrent();
+    AudioEngine.play("click");
+    toast(`Language set to ${this.languages.find(l => l.code === lang).label.split(" (")[0]}`, "info");
+  },
+
+  t(key) {
+    const dict = this.translations[this.currentLang];
+    if (dict && dict[key] !== undefined) return dict[key];
+    const enDict = this.translations["en"];
+    return (enDict && enDict[key] !== undefined) ? enDict[key] : key;
+  }
+};
+
+function t(key) {
+  return I18nEngine.t(key);
+}
+
+/* ========================================================================== */
+/* ===== SOUND SYNTHESIZER ENGINE (WEB AUDIO API - ZERO DEPENDENCY) ========= */
+/* ========================================================================== */
+
+const AudioEngine = {
+  ctx: null,
+  init() {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC && !this.ctx) this.ctx = new AC();
+    } catch(e) {}
+  },
+  play(type = "click") {
+    try {
+      this.init();
+      if (!this.ctx) return;
+      if (this.ctx.state === "suspended") this.ctx.resume();
+
+      const t = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      if (type === "click") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(800, t);
+        osc.frequency.exponentialRampToValueAtTime(350, t + 0.05);
+        gain.gain.setValueAtTime(0.1, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc.start(t);
+        osc.stop(t + 0.05);
+      } else if (type === "success") {
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(523.25, t);
+        osc.frequency.setValueAtTime(659.25, t + 0.08);
+        osc.frequency.setValueAtTime(783.99, t + 0.16);
+        gain.gain.setValueAtTime(0.14, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        osc.start(t);
+        osc.stop(t + 0.35);
+      } else if (type === "error") {
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(240, t);
+        osc.frequency.setValueAtTime(160, t + 0.12);
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        osc.start(t);
+        osc.stop(t + 0.25);
+      } else if (type === "scan") {
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(1100, t);
+        osc.frequency.exponentialRampToValueAtTime(2600, t + 0.18);
+        gain.gain.setValueAtTime(0.08, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        osc.start(t);
+        osc.stop(t + 0.18);
+      }
+    } catch(e) {}
+  }
+};
+
+/* ========================================================================== */
+/* ===== PURE 2D CANVAS CONFETTI SIMULATOR ================================== */
+/* ========================================================================== */
+
+const ConfettiSim = {
+  canvas: null,
+  ctx: null,
+  particles: [],
+  anim: null,
+  init() {
+    this.canvas = document.getElementById("confetti-canvas");
+    if (this.canvas) this.ctx = this.canvas.getContext("2d");
+  },
+  trigger(dur = 2500) {
+    this.init();
+    if (!this.canvas) return;
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+    const palette = ["#10b981", "#06b6d4", "#f59e0b", "#6366f1", "#ec4899"];
+
+    for (let i = 0; i < 80; i++) {
+      this.particles.push({
+        x: window.innerWidth * 0.5,
+        y: window.innerHeight * 0.6,
+        vx: (Math.random() - 0.5) * 16,
+        vy: (Math.random() - 0.8) * 18,
+        sz: Math.random() * 8 + 4,
+        col: palette[Math.floor(Math.random() * palette.length)],
+        rot: Math.random() * 360,
+        vr: (Math.random() - 0.5) * 14,
+        a: 1
+      });
+    }
+    if (!this.anim) this.tick();
+    setTimeout(() => { this.particles = []; }, dur);
+  },
+  tick() {
+    if (!ConfettiSim.ctx) return;
+    ConfettiSim.ctx.clearRect(0, 0, ConfettiSim.canvas.width, ConfettiSim.canvas.height);
+
+    for (let i = ConfettiSim.particles.length - 1; i >= 0; i--) {
+      const p = ConfettiSim.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.38;
+      p.rot += p.vr;
+      p.a -= 0.008;
+
+      ConfettiSim.ctx.save();
+      ConfettiSim.ctx.globalAlpha = Math.max(p.a, 0);
+      ConfettiSim.ctx.translate(p.x, p.y);
+      ConfettiSim.ctx.rotate((p.rot * Math.PI) / 180);
+      ConfettiSim.ctx.fillStyle = p.col;
+      ConfettiSim.ctx.fillRect(-p.sz / 2, -p.sz / 2, p.sz, p.sz);
+      ConfettiSim.ctx.restore();
+
+      if (p.a <= 0 || p.y > ConfettiSim.canvas.height) {
+        ConfettiSim.particles.splice(i, 1);
+      }
+    }
+
+    if (ConfettiSim.particles.length > 0) {
+      ConfettiSim.anim = requestAnimationFrame(ConfettiSim.tick);
+    } else {
+      ConfettiSim.anim = null;
+      ConfettiSim.ctx.clearRect(0, 0, ConfettiSim.canvas.width, ConfettiSim.canvas.height);
+    }
+  }
+};
+
+/* ========================================================================== */
+/* ===== STORAGE & RESILIENT DATA LAYER ===================================== */
+/* ========================================================================== */
+
+const memoryCache = {};
+
+function dbGet(key, defaultVal) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : defaultVal;
+  } catch(e) {
+    return memoryCache[key] !== undefined ? memoryCache[key] : defaultVal;
+  }
+}
+
+function dbSet(key, val) {
+  try {
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch(e) {
+    memoryCache[key] = val;
+  }
+}
+
+function escapeHTML(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function generateId(prefix = "TKT") {
+  return prefix + "-" + Math.floor(1000 + Math.random() * 9000);
+}
+
+function formatDate(iso) {
+  if (!iso) return "N/A";
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? "N/A" : d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function toast(msg, type = "info") {
+  AudioEngine.play(type === "error" ? "error" : "click");
+  const box = document.getElementById("toast-container");
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.innerText = msg;
+  box.appendChild(el);
+  setTimeout(() => el.classList.add("show"), 10);
+  setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => el.remove(), 250);
+  }, 3500);
+}
+
+function showConfirm(title, message, callback) {
+  const container = document.getElementById("modal-container");
+  container.innerHTML = `
+    <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:9999;">
+      <div class="panel" style="max-width:440px;width:90%;">
+        <h3>${escapeHTML(title)}</h3>
+        <p style="color:var(--text-muted);margin:1rem 0 1.5rem 0;font-size:0.9rem;">${escapeHTML(message)}</p>
+        <div style="display:flex;justify-content:flex-end;gap:0.5rem;">
+          <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+          <button class="btn btn-danger" id="confirm-modal-exec">Proceed</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById("confirm-modal-exec").onclick = () => {
+    callback();
+    container.innerHTML = "";
+  };
+}
+
+async function hashPassword(pass, salt) {
+  const salted = pass + "::" + salt;
+  try {
+    if (window.crypto && crypto.subtle && window.TextEncoder) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(salted));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+  } catch(e) {}
+  let h = 0;
+  for (let i = 0; i < salted.length; i++) {
+    h = (h << 5) - h + salted.charCodeAt(i);
+    h |= 0;
+  }
+  return "fb_" + Math.abs(h).toString(16);
+}
+
+const Store = {
+  getUsers: () => dbGet("ecopulse_users_v8", []),
+  setUsers: (u) => dbSet("ecopulse_users_v8", u),
+  getItems: () => dbGet("ecopulse_tickets_v8", []),
+  setItems: (i) => dbSet("ecopulse_tickets_v8", i),
+  getSession: () => dbGet("ecopulse_session_v8", null),
+  setSession: (s) => dbSet("ecopulse_session_v8", s),
+  getDraft: () => dbGet("ecopulse_draft_v8", null),
+  setDraft: (d) => dbSet("ecopulse_draft_v8", d),
+  clearDraft: () => {
+    try { localStorage.removeItem("ecopulse_draft_v8"); } catch(e){}
+    delete memoryCache["ecopulse_draft_v8"];
+  }
+};
+
+/* ========================================================================== */
+/* ===== AUTHENTICATION & REPUTATION ENGINE ================================= */
+/* ========================================================================== */
+
+const Auth = {
+  async initAdmin() {
+    const users = Store.getUsers();
+    if (!users.some(u => u.role === "admin")) {
+      const salt = "slt_master_adm_99";
+      const passHash = await hashPassword("Admin@123", salt);
+      users.push({
+        id: "admin_root",
+        name: "Municipal Command Dispatcher",
+        email: "admin@ecopulse.org",
+        salt,
+        passHash,
+        role: "admin",
+        ecoCredits: 9999,
+        preferredLang: "en",
+        createdAt: new Date().toISOString()
+      });
+      Store.setUsers(users);
+    }
+  },
+
+  getCurrentUser() {
+    return Store.getSession();
+  },
+
+  async register(name, email, pass) {
+    const users = Store.getUsers();
+    const cleanEmail = email.trim().toLowerCase();
+    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
+      throw new Error("This email address is already registered in registry.");
+    }
+    const salt = "slt_" + Math.random().toString(36).substr(2, 6);
+    const passHash = await hashPassword(pass, salt);
+    const user = {
+      id: "usr_" + Math.random().toString(36).substr(2, 8),
+      name: name.trim(),
+      email: cleanEmail,
+      salt,
+      passHash,
+      role: "citizen",
+      ecoCredits: 50,
+      preferredLang: I18nEngine.currentLang,
+      createdAt: new Date().toISOString()
+    };
+    users.push(user);
+    Store.setUsers(users);
+    return user;
+  },
+
+  async login(email, pass) {
+    const users = Store.getUsers();
+    const u = users.find(x => x.email.toLowerCase() === email.trim().toLowerCase());
+    if (!u) throw new Error("Invalid authorization credentials.");
+    const check = await hashPassword(pass, u.salt);
+    if (check !== u.passHash) throw new Error("Invalid authorization credentials.");
+
+    const session = {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      role: u.role,
+      ecoCredits: u.ecoCredits || 50,
+      preferredLang: u.preferredLang || "en"
+    };
+    Store.setSession(session);
+    if (u.preferredLang && u.preferredLang !== I18nEngine.currentLang) {
+      I18nEngine.setLang(u.preferredLang);
+    }
+    return session;
+  },
+
+  logout() {
+    Store.setSession(null);
+    Router.navigate("home");
+  },
+
+  addCredits(userId, pts) {
+    const users = Store.getUsers();
+    const u = users.find(x => x.id === userId);
+    if (u) {
+      u.ecoCredits = (u.ecoCredits || 0) + pts;
+      Store.setUsers(users);
+      const s = Store.getSession();
+      if (s && s.id === userId) {
+        s.ecoCredits = u.ecoCredits;
+        Store.setSession(s);
+      }
+    }
+  },
+
+  getReputationTier(pts = 0) {
+    if (pts >= 300) return { title: "Circular Vanguard", color: "var(--accent)" };
+    if (pts >= 120) return { title: "Green Guardian", color: "var(--primary)" };
+    return { title: "Eco-Novice", color: "var(--warning)" };
+  }
+};
+
+/* ========================================================================== */
+/* ===== VECTOR GIS SOFTWARE ENGINE (PAN, ZOOM, 4 MODES, TSP ROUTING) ====== */
+/* ========================================================================== */
+
+const GISMapEngine = {
+  viewports: {},
+  pinnedCoords: { x: 220, y: 140 },
+
+  initViewport(containerId) {
+    if (!this.viewports[containerId]) {
+      this.viewports[containerId] = {
+        zoom: 1,
+        panX: 0,
+        panY: 0,
+        isDragging: false,
+        startX: 0,
+        startY: 0
+      };
+    }
+    return this.viewports[containerId];
+  },
+
+  render(containerId, options = {}) {
+    const vp = this.initViewport(containerId);
+    const mode = options.mode || "radar";
+    const width = options.width || 460;
+    const height = options.height || 360;
+    const items = options.items || Store.getItems();
+    const selectedItem = options.selectedItem || null;
+    const now = Date.now();
+
+    let pinsMarkup = "";
+    if (mode === "picker") {
+      pinsMarkup = `
+        <g id="${containerId}-picker-pin" transform="translate(${this.pinnedCoords.x}, ${this.pinnedCoords.y})">
+          <circle r="7" fill="var(--danger)" stroke="#fff" stroke-width="2"/>
+          <circle r="16" fill="none" stroke="var(--danger)" stroke-width="1.5" class="radar-pulse-ring"/>
+          <text y="-12" fill="#fff" font-size="9" font-weight="700" text-anchor="middle" font-family="var(--font-mono)">${this.pinnedCoords.x}E, ${this.pinnedCoords.y}N</text>
+        </g>
+      `;
+    } else if (mode === "inspector" && selectedItem) {
+      const cx = selectedItem.coords ? selectedItem.coords.x : 225;
+      const cy = selectedItem.coords ? selectedItem.coords.y : 165;
+      pinsMarkup = `
+        <g transform="translate(${cx}, ${cy})">
+          <circle r="8" fill="var(--accent)" stroke="#fff" stroke-width="2"/>
+          <circle r="22" fill="none" stroke="var(--accent)" stroke-width="2" class="radar-pulse-ring"/>
+          <text y="-14" fill="#fff" font-size="10" font-weight="800" text-anchor="middle" font-family="var(--font-mono)">${escapeHTML(selectedItem.id)}</text>
+        </g>
+      `;
+    } else {
+      pinsMarkup = items.map(it => {
+        const cx = it.coords ? it.coords.x : (100 + (it.id.charCodeAt(4) * 8) % 260);
+        const cy = it.coords ? it.coords.y : (80 + (it.id.charCodeAt(5) * 6) % 180);
+        const isOverdue = it.status === "Pending" && ((now - new Date(it.createdAt).getTime()) / (1000 * 3600 * 24) > 3);
+        const pinColor = isOverdue ? "var(--danger)" : it.status === "Resolved" ? "var(--primary)" : it.status === "In Progress" ? "var(--purple)" : "var(--warning)";
+
+        return `
+          <g data-action="gis-pin-inspect" data-id="${it.id}" style="cursor:pointer;">
+            <circle cx="${cx}" cy="${cy}" r="5.5" fill="${pinColor}"/>
+            <circle cx="${cx}" cy="${cy}" r="14" fill="none" stroke="${pinColor}" stroke-width="1.5" opacity="0.65"/>
+          </g>
+        `;
+      }).join("");
+    }
+
+    return `
+      <div class="gis-stage" id="${containerId}-frame">
+        <div class="gis-ctrl-bar">
+          <span>GIS MODE: ${mode.toUpperCase()}</span>
+          <span id="${containerId}-zoom-readout">ZOOM: ${Math.round(vp.zoom * 100)}%</span>
+        </div>
+
+        <div class="gis-zoom-tools">
+          <button class="gis-tool-btn" data-action="gis-zoom-in" data-target="${containerId}" title="Zoom In">+</button>
+          <button class="gis-tool-btn" data-action="gis-zoom-out" data-target="${containerId}" title="Zoom Out">-</button>
+          <button class="gis-tool-btn" data-action="gis-zoom-reset" data-target="${containerId}" title="Reset View" style="font-size:0.75rem;">&#8635;</button>
+        </div>
+
+        <div class="gis-live-coords-hud" id="${containerId}-coords-hud">WAYPOINT: ${this.pinnedCoords.x}E, ${this.pinnedCoords.y}N</div>
+
+        <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" id="${containerId}-svg">
+          <defs>
+            <pattern id="${containerId}-grid-pattern" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#${containerId}-grid-pattern)" />
+
+          <g id="${containerId}-panzoom-layer" transform="translate(${vp.panX}, ${vp.panY}) scale(${vp.zoom})">
+            <path d="M 0 165 L 460 165 M 225 0 L 225 360 M 80 0 L 80 360 M 350 0 L 350 360 M 0 85 L 460 85 M 0 255 L 460 255" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="3"/>
+
+            <rect x="20" y="20" width="180" height="130" fill="rgba(6,182,212,0.06)" stroke="rgba(6,182,212,0.25)" rx="8"/>
+            <text x="30" y="40" fill="rgba(6,182,212,0.8)" font-size="8" font-weight="700">${escapeHTML(t("gis_sector_1"))}</text>
+
+            <rect x="230" y="20" width="200" height="130" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.25)" rx="8"/>
+            <text x="240" y="40" fill="rgba(16,185,129,0.8)" font-size="8" font-weight="700">${escapeHTML(t("gis_sector_2"))}</text>
+
+            <rect x="20" y="180" width="220" height="150" fill="rgba(245,158,11,0.06)" stroke="rgba(245,158,11,0.25)" rx="8"/>
+            <text x="30" y="200" fill="rgba(245,158,11,0.8)" font-size="8" font-weight="700">${escapeHTML(t("gis_sector_3"))}</text>
+
+            <rect x="260" y="180" width="170" height="150" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.25)" rx="8"/>
+            <text x="270" y="200" fill="rgba(239,68,68,0.8)" font-size="8" font-weight="700">${escapeHTML(t("gis_sector_4"))}</text>
+
+            <circle cx="225" cy="165" r="9" fill="#fff" stroke="var(--primary)" stroke-width="3"/>
+            <text x="225" y="150" fill="#fff" font-size="9" font-weight="800" text-anchor="middle" font-family="var(--font-mono)">${escapeHTML(t("gis_central_depot"))}</text>
+
+            <path id="${containerId}-tsp-trajectory" d="" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.9"/>
+
+            <g id="${containerId}-pins">${pinsMarkup}</g>
+          </g>
+        </svg>
+
+        <div id="${containerId}-hud" class="gis-hud-card">
+          <h5 id="${containerId}-hud-title">Ref ID</h5>
+          <p id="${containerId}-hud-desc" style="color:var(--text-muted); margin:0.25rem 0 0.5rem 0; font-size:0.78rem;"></p>
+          <div id="${containerId}-hud-status"></div>
+        </div>
+      </div>
+    `;
+  },
+
+  attachControls(containerId, inputTargetId = null) {
+    const frame = document.getElementById(`${containerId}-frame`);
+    const svg = document.getElementById(`${containerId}-svg`);
+    const layer = document.getElementById(`${containerId}-panzoom-layer`);
+    const hudCoords = document.getElementById(`${containerId}-coords-hud`);
+    if (!frame || !svg || !layer) return;
+
+    const vp = this.initViewport(containerId);
+
+    const updateTransform = () => {
+      layer.setAttribute("transform", `translate(${vp.panX}, ${vp.panY}) scale(${vp.zoom})`);
+      const zoomReadout = document.getElementById(`${containerId}-zoom-readout`);
+      if (zoomReadout) zoomReadout.innerText = `ZOOM: ${Math.round(vp.zoom * 100)}%`;
+    };
+
+    frame.onmousedown = (e) => {
+      if (e.target.closest(".gis-ctrl-bar") || e.target.closest(".gis-zoom-tools")) return;
+      vp.isDragging = true;
+      vp.startX = e.clientX - vp.panX;
+      vp.startY = e.clientY - vp.panY;
+    };
+
+    window.addEventListener("mousemove", (e) => {
+      if (!vp.isDragging) return;
+      vp.panX = e.clientX - vp.startX;
+      vp.panY = e.clientY - vp.startY;
+      updateTransform();
+    });
+
+    window.addEventListener("mouseup", () => { vp.isDragging = false; });
+
+    frame.onwheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      vp.zoom = Math.min(Math.max(vp.zoom + delta, 0.6), 2.8);
+      updateTransform();
+    };
+
+    svg.onmousemove = (e) => {
+      const rect = svg.getBoundingClientRect();
+      const clientX = e.clientX - rect.left;
+      const clientY = e.clientY - rect.top;
+      const svgX = Math.round(((clientX - vp.panX) / vp.zoom) * (460 / rect.width));
+      const svgY = Math.round(((clientY - vp.panY) / vp.zoom) * (360 / rect.height));
+
+      if (hudCoords) hudCoords.innerText = `CURSOR: ${Math.max(svgX, 0)}E, ${Math.max(svgY, 0)}N`;
+    };
+
+    if (inputTargetId) {
+      svg.onclick = (e) => {
+        if (e.target.closest(".gis-ctrl-bar") || e.target.closest(".gis-zoom-tools")) return;
+        const rect = svg.getBoundingClientRect();
+        const clientX = e.clientX - rect.left;
+        const clientY = e.clientY - rect.top;
+        const x = Math.round(((clientX - vp.panX) / vp.zoom) * (460 / rect.width));
+        const y = Math.round(((clientY - vp.panY) / vp.zoom) * (360 / rect.height));
+
+        this.pinnedCoords = { x: Math.max(Math.min(x, 440), 20), y: Math.max(Math.min(y, 340), 20) };
+
+        let sector = t("sec_1_name");
+        if (x > 220 && y <= 160) sector = t("sec_2_name");
+        else if (x <= 230 && y > 160) sector = t("sec_3_name");
+        else if (x > 230 && y > 160) sector = t("sec_4_name");
+
+        const targetEl = document.getElementById(inputTargetId);
+        if (targetEl) targetEl.value = `${sector} [GIS: ${this.pinnedCoords.x}E, ${this.pinnedCoords.y}N]`;
+
+        AudioEngine.play("click");
+        toast(`Geotagged: ${this.pinnedCoords.x}E, ${this.pinnedCoords.y}N (${sector})`, "info");
+
+        const pinsGroup = document.getElementById(`${containerId}-pins`);
+        if (pinsGroup) {
+          pinsGroup.innerHTML = `
+            <g id="${containerId}-picker-pin" transform="translate(${this.pinnedCoords.x}, ${this.pinnedCoords.y})">
+              <circle r="7" fill="var(--danger)" stroke="#fff" stroke-width="2"/>
+              <circle r="16" fill="none" stroke="var(--danger)" stroke-width="1.5" class="radar-pulse-ring"/>
+              <text y="-12" fill="#fff" font-size="9" font-weight="700" text-anchor="middle" font-family="var(--font-mono)">${this.pinnedCoords.x}E, ${this.pinnedCoords.y}N</text>
+            </g>
+          `;
+        }
+      };
+    }
+  },
+
+  zoom(containerId, factor) {
+    const vp = this.initViewport(containerId);
+    if (factor === 0) {
+      vp.zoom = 1; vp.panX = 0; vp.panY = 0;
+    } else {
+      vp.zoom = Math.min(Math.max(vp.zoom + factor, 0.6), 2.8);
+    }
+    const layer = document.getElementById(`${containerId}-panzoom-layer`);
+    if (layer) layer.setAttribute("transform", `translate(${vp.panX}, ${vp.panY}) scale(${vp.zoom})`);
+    const zoomReadout = document.getElementById(`${containerId}-zoom-readout`);
+    if (zoomReadout) zoomReadout.innerText = `ZOOM: ${Math.round(vp.zoom * 100)}%`;
+    AudioEngine.play("click");
+  }
+};
+
+/* ========================================================================== */
+/* ===== DEMO DATA SEEDER (24 MULTI-DAY RECORDS) ============================ */
+/* ========================================================================== */
+
+async function seedDemoData() {
+  const users = Store.getUsers();
+  let citizen = users.find(u => u.email === "citizen@ecopulse.org");
+  if (!citizen) {
+    const salt = "slt_demo_cit";
+    const passHash = await hashPassword("Citizen@123", salt);
+    citizen = {
+      id: "cit_demo_01",
+      name: "Sophia Vance",
+      email: "citizen@ecopulse.org",
+      salt,
+      passHash,
+      role: "citizen",
+      ecoCredits: 240,
+      preferredLang: I18nEngine.currentLang,
+      createdAt: new Date(Date.now() - 9 * 86400000).toISOString()
+    };
+    users.push(citizen);
+    Store.setUsers(users);
+  }
+
+  const sectors = [
+    { name: t("sec_1_name"), x: 80, y: 70 },
+    { name: t("sec_2_name"), x: 380, y: 90 },
+    { name: t("sec_3_name"), x: 150, y: 240 },
+    { name: t("sec_4_name"), x: 320, y: 280 }
+  ];
+  const issues = ["Overflowing bin", "Garbage on road", "Missed collection", "Illegal dumping", "Hazardous dump"];
+  const priorities = ["Low", "Medium", "High"];
+  const teams = ["Team A (Rapid Compactor)", "Team B (Hazardous Recovery)", "Team C (Recycling Fleet)"];
+
+  const seeded = [];
+  const now = Date.now();
+
+  for (let i = 0; i < 24; i++) {
+    const isReport = i % 2 === 0;
+    const daysAgo = Math.floor(i / 2.7);
+    const createdTime = new Date(now - daysAgo * 86400000 - (i % 7) * 3600000).toISOString();
+    const sec = sectors[i % sectors.length];
+
+    let status = "Pending";
+    if (i % 4 === 1) status = "Assigned";
+    else if (i % 4 === 2) status = "In Progress";
+    else if (i % 4 === 3) status = "Resolved";
+
+    const item = {
+      id: (isReport ? "REP-" : "PIK-") + (2000 + i),
+      userId: citizen.id,
+      category: isReport ? "report" : "pickup",
+      createdAt: createdTime,
+      status: status,
+      timeline: [{ status: "Submitted", timestamp: createdTime, by: citizen.name }],
+      assignedTeam: status !== "Pending" ? teams[i % teams.length] : null,
+      adminRemark: status !== "Pending" ? "Sanitation crew assigned to municipal sector." : "",
+      rating: status === "Resolved" ? (i % 2 === 0 ? 5 : 4) : 0,
+      coords: { x: sec.x + (i * 7) % 30, y: sec.y + (i * 9) % 25 },
+      readByCitizen: false,
+      auditLog: [`${createdTime}: Ingested by ${citizen.name}`]
+    };
+
+    if (["Assigned", "In Progress", "Resolved"].includes(status)) {
+      const tTime = new Date(new Date(createdTime).getTime() + 7200000).toISOString();
+      item.timeline.push({ status: "Assigned", timestamp: tTime, by: "Admin Dispatcher" });
+      item.auditLog.push(`${tTime}: Assigned to ${item.assignedTeam}`);
+    }
+    if (["In Progress", "Resolved"].includes(status)) {
+      const tTime = new Date(new Date(createdTime).getTime() + 18000000).toISOString();
+      item.timeline.push({ status: "In Progress", timestamp: tTime, by: item.assignedTeam });
+      item.auditLog.push(`${tTime}: Vehicle in-transit`);
+    }
+    if (status === "Resolved") {
+      const tTime = new Date(new Date(createdTime).getTime() + 32400000).toISOString();
+      item.timeline.push({ status: "Resolved", timestamp: tTime, by: "Ground Operations" });
+      item.auditLog.push(`${tTime}: Cleared by crew`);
+    }
+
+    if (isReport) {
+      item.type = issues[i % issues.length];
+      item.location = `${sec.name} [GIS: ${item.coords.x}E, ${item.coords.y}N]`;
+      item.priority = priorities[i % priorities.length];
+      item.description = "Persistent solid waste overflow spreading across sidewalk curb.";
+      item.photos = [];
+    } else {
+      item.wasteType = "Dry/recyclable";
+      item.address = `${sec.name} [GIS: ${item.coords.x}E, ${item.coords.y}N]`;
+      item.pickupDate = "2026-10-06";
+      item.timeSlot = "Morning (8 AM - 11 AM)";
+      item.repeat = "One time";
+      item.notes = "Segregated packages outside door.";
+    }
+
+    seeded.push(item);
+  }
+
+  Store.setItems(seeded);
+  toast("Seeded 24 realistic multi-day incident records!", "success");
+  Router.renderCurrent();
+}
+
+/* ========================================================================== */
+/* ===== ROUTER & UI ORCHESTRATOR =========================================== */
+/* ========================================================================== */
+
+const Router = {
+  currentRoute: "home",
+  routes: ["home", "report", "pickup", "tracking", "awareness", "admin", "login", "register", "profile"],
+
+  init() {
+    window.addEventListener("hashchange", () => {
+      const h = window.location.hash.replace("#", "").trim();
+      this.navigate(h || "home", false);
+    });
+    const initial = window.location.hash.replace("#", "").trim() || "home";
+    this.navigate(initial, false);
+  },
+
+  navigate(route, updateHash = true) {
+    if (!this.routes.includes(route)) route = "home";
+    const user = Auth.getCurrentUser();
+
+    if (["report", "pickup", "tracking", "profile"].includes(route) && !user) {
+      toast("Authentication required to access module.", "info");
+      route = "login";
+    }
+    if (route === "admin" && (!user || user.role !== "admin")) {
+      toast("Access Denied: Administrative authority required.", "error");
+      route = "home";
+    }
+
+    this.currentRoute = route;
+    if (updateHash) window.location.hash = route;
+    this.renderCurrent();
+  },
+
+  renderCurrent() {
+    const user = Auth.getCurrentUser();
+    UI.renderNav(user);
+    const view = document.getElementById("viewport");
+    view.innerHTML = "";
+
+    switch (this.currentRoute) {
+      case "home": UI.renderHome(view); break;
+      case "report": UI.renderReport(view); break;
+      case "pickup": UI.renderPickup(view); break;
+      case "tracking": UI.renderTracking(view); break;
+      case "awareness": UI.renderAwareness(view); break;
+      case "admin": UI.renderAdmin(view); break;
+      case "login": UI.renderLogin(view); break;
+      case "register": UI.renderRegister(view); break;
+      case "profile": UI.renderProfile(view); break;
+      default: UI.renderHome(view);
+    }
+    window.scrollTo(0, 0);
+  }
+};
+
+/* ========================================================================== */
+/* ===== UI VIEW CONTROLLERS ================================================ */
+/* ========================================================================== */
+
+const UI = {
+  renderNav(user) {
+    const nav = document.getElementById("main-nav");
+    const authActions = document.getElementById("auth-actions");
+    const notifBtn = document.getElementById("notif-btn");
+    const notifCount = document.getElementById("notif-count");
+
+    const links = [
+      { id: "home", label: t("nav_home") },
+      { id: "awareness", label: t("nav_awareness") }
+    ];
+
+    if (user) {
+      links.push({ id: "report", label: t("nav_report") });
+      links.push({ id: "pickup", label: t("nav_pickup") });
+      links.push({ id: "tracking", label: t("nav_tracking") });
+      if (user.role === "admin") links.push({ id: "admin", label: t("nav_admin") });
+    }
+
+    nav.innerHTML = links.map(l => `
+      <li class="nav-item ${Router.currentRoute === l.id ? "active" : ""}" data-route="${l.id}">
+        ${l.label}
+      </li>
+    `).join("");
+
+    if (user) {
+      notifBtn.style.display = "inline-flex";
+      const items = Store.getItems().filter(i => i.userId === user.id);
+      const unread = items.filter(i => !i.readByCitizen && i.timeline && i.timeline.length > 1).length;
+      if (unread > 0) {
+        notifCount.style.display = "inline";
+        notifCount.innerText = unread;
+      } else {
+        notifCount.style.display = "none";
+      }
+
+      const rep = Auth.getReputationTier(user.ecoCredits);
+      authActions.innerHTML = `
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+          <span class="badge" style="background:rgba(16,185,129,0.12); color:${rep.color}; border:1px solid ${rep.color};">
+            &#9879; ${user.ecoCredits || 50} pts (${rep.title})
+          </span>
+          <button class="btn btn-secondary btn-sm" data-route="profile">&#128100; ${escapeHTML(user.name.split(" ")[0])}</button>
+          <button class="btn btn-secondary btn-sm" data-action="logout">${escapeHTML(t("nav_signout"))}</button>
+        </div>
+      `;
+    } else {
+      notifBtn.style.display = "none";
+      authActions.innerHTML = `<button class="btn btn-primary btn-sm" data-route="login">${escapeHTML(t("nav_signin"))}</button>`;
+    }
+  },
+
+  renderHome(container) {
+    const items = Store.getItems();
+    const resolved = items.filter(i => i.status === "Resolved").length;
+    const divertedKg = resolved * 32;
+
+    container.innerHTML = `
+      <div class="panel" style="padding:3.5rem 2rem; text-align:center; margin-bottom:2rem; border-color:var(--border-accent);">
+        <span class="badge badge-resolved" style="margin-bottom:1rem;">${escapeHTML(t("hero_tag"))}</span>
+        <h1 style="font-size:2.8rem; letter-spacing:-0.04em; margin-bottom:1rem; line-height:1.15;">
+          ${escapeHTML(t("hero_title"))}
+        </h1>
+        <p style="max-width:680px; margin:0 auto 2rem auto; color:var(--text-muted); font-size:1.05rem;">
+          ${escapeHTML(t("hero_desc"))}
+        </p>
+        <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+          <button class="btn btn-primary" data-route="report">&#9888; ${escapeHTML(t("btn_report_public"))}</button>
+          <button class="btn btn-secondary" data-route="pickup">&#128666; ${escapeHTML(t("btn_book_doorstep"))}</button>
+          <button class="btn btn-secondary" data-route="awareness">&#127793; ${escapeHTML(t("btn_segregation_lab"))}</button>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:2rem;">
+        <div class="panel" style="text-align:center;">
+          <div style="font-size:2.2rem; font-weight:800; color:var(--primary); font-family:var(--font-mono);">${items.length}</div>
+          <div style="font-size:0.88rem; color:var(--text-muted);">${escapeHTML(t("kpi_total"))}</div>
+        </div>
+        <div class="panel" style="text-align:center;">
+          <div style="font-size:2.2rem; font-weight:800; color:var(--accent); font-family:var(--font-mono);">${resolved}</div>
+          <div style="font-size:0.88rem; color:var(--text-muted);">${escapeHTML(t("kpi_resolved"))}</div>
+        </div>
+        <div class="panel" style="text-align:center;">
+          <div style="font-size:2.2rem; font-weight:800; color:var(--purple); font-family:var(--font-mono);">${divertedKg} kg</div>
+          <div style="font-size:0.88rem; color:var(--text-muted);">${escapeHTML(t("kpi_diverted"))}</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3 style="margin-bottom:0.5rem;">${escapeHTML(t("ai_vision_title"))}</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.25rem;">
+            ${escapeHTML(t("ai_vision_desc"))}
+          </p>
+          <button class="btn btn-secondary btn-sm" data-route="report">${escapeHTML(t("btn_test_ai"))} &rarr;</button>
+        </div>
+        <div class="panel">
+          <h3 style="margin-bottom:0.5rem;">${escapeHTML(t("gis_fleet_title"))}</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.25rem;">
+            ${escapeHTML(t("gis_fleet_desc"))}
+          </p>
+          <button class="btn btn-secondary btn-sm" data-route="admin">${escapeHTML(t("btn_view_radar"))} &rarr;</button>
+        </div>
+      </div>
+    `;
+  },
+
+  renderLogin(container) {
+    container.innerHTML = `
+      <div style="max-width:420px; margin:2rem auto;">
+        <div class="panel">
+          <h2 style="margin-bottom:0.4rem; text-align:center;">${escapeHTML(t("nav_signin"))}</h2>
+          <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:1.5rem;">Access the Municipal Waste Network</p>
+          
+          <form id="login-form">
+            <div class="form-group">
+              <label for="l-email">${escapeHTML(t("prof_email_label"))}</label>
+              <input type="email" id="l-email" class="form-control" required placeholder="admin@ecopulse.org">
+            </div>
+            <div class="form-group">
+              <label for="l-pass">Password</label>
+              <input type="password" id="l-pass" class="form-control" required placeholder="Enter password">
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+              <label style="font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" id="l-show"> Show Password
+              </label>
+              <label style="font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" id="l-rem"> Remember me
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">${escapeHTML(t("nav_signin"))}</button>
+            <div class="form-error" id="l-err" style="margin-top:0.75rem; text-align:center;"></div>
+          </form>
+
+          <p style="font-size:0.86rem; text-align:center; margin-top:1.5rem; color:var(--text-muted);">
+            Need a citizen profile? <a href="#register" data-route="register">Create Account</a>
+          </p>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("l-show").onchange = (e) => {
+      document.getElementById("l-pass").type = e.target.checked ? "text" : "password";
+    };
+
+    document.getElementById("login-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById("l-err");
+      errBox.classList.remove("visible");
+
+      try {
+        const u = await Auth.login(document.getElementById("l-email").value, document.getElementById("l-pass").value);
+        toast("Authenticated as " + u.name, "success");
+        Router.navigate(u.role === "admin" ? "admin" : "tracking");
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.classList.add("visible");
+        AudioEngine.play("error");
+      }
+    };
+  },
+
+  renderRegister(container) {
+    container.innerHTML = `
+      <div style="max-width:440px; margin:2rem auto;">
+        <div class="panel">
+          <h2 style="margin-bottom:0.4rem; text-align:center;">Citizen Registration</h2>
+          <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:1.5rem;">Join the Clean City Collective</p>
+
+          <form id="reg-form">
+            <div class="form-group">
+              <label for="r-name">${escapeHTML(t("prof_name_label"))}</label>
+              <input type="text" id="r-name" class="form-control" required placeholder="Elena Rostova">
+            </div>
+            <div class="form-group">
+              <label for="r-email">${escapeHTML(t("prof_email_label"))}</label>
+              <input type="email" id="r-email" class="form-control" required placeholder="elena@domain.com">
+            </div>
+            <div class="form-group">
+              <label for="r-pass">Password (Min. 6 chars)</label>
+              <input type="password" id="r-pass" class="form-control" required placeholder="Create secure password">
+              <div style="height:4px; background:var(--bg-elevated); margin-top:6px; border-radius:2px; overflow:hidden;">
+                <div id="pass-bar" style="height:100%; width:0%; background:var(--danger); transition:var(--transition);"></div>
+              </div>
+              <small id="pass-hint" style="font-size:0.75rem; color:var(--text-muted);"></small>
+            </div>
+            <div style="margin-bottom:1.25rem;">
+              <label style="font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; cursor:pointer;">
+                <input type="checkbox" id="r-show"> Show Password
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Complete Registration</button>
+            <div class="form-error" id="r-err" style="margin-top:0.75rem; text-align:center;"></div>
+          </form>
+
+          <p style="font-size:0.86rem; text-align:center; margin-top:1.5rem; color:var(--text-muted);">
+            Existing user? <a href="#login" data-route="login">Sign In</a>
+          </p>
+        </div>
+      </div>
+    `;
+
+    const passInput = document.getElementById("r-pass");
+    const bar = document.getElementById("pass-bar");
+    const hint = document.getElementById("pass-hint");
+
+    passInput.oninput = () => {
+      const v = passInput.value;
+      let score = 0;
+      if (v.length >= 6) score++;
+      if (/[A-Z]/.test(v)) score++;
+      if (/[0-9]/.test(v)) score++;
+      if (/[^A-Za-z0-9]/.test(v)) score++;
+
+      bar.style.width = (score / 4) * 100 + "%";
+      if (score <= 1) {
+        bar.style.background = "var(--danger)";
+        hint.innerText = "Strength: Vulnerable";
+      } else if (score <= 3) {
+        bar.style.background = "var(--warning)";
+        hint.innerText = "Strength: Moderate";
+      } else {
+        bar.style.background = "var(--primary)";
+        hint.innerText = "Strength: Cryptographically Solid";
+      }
+    };
+
+    document.getElementById("r-show").onchange = (e) => {
+      passInput.type = e.target.checked ? "text" : "password";
+    };
+
+    document.getElementById("reg-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById("r-err");
+      errBox.classList.remove("visible");
+
+      if (passInput.value.length < 6) {
+        errBox.innerText = "Password must be at least 6 characters.";
+        errBox.classList.add("visible");
+        return;
+      }
+
+      try {
+        await Auth.register(document.getElementById("r-name").value, document.getElementById("r-email").value, passInput.value);
+        toast("Registration successful! Please login.", "success");
+        Router.navigate("login");
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.classList.add("visible");
+      }
+    };
+  },
+
+  renderProfile(container) {
+    const user = Auth.getCurrentUser();
+    if (!user) return;
+    const rep = Auth.getReputationTier(user.ecoCredits);
+
+    container.innerHTML = `
+      <div style="max-width:520px; margin:1.5rem auto;">
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h2>${escapeHTML(t("prof_title"))}</h2>
+            <span class="badge" style="background:rgba(16,185,129,0.12); color:${rep.color}; border:1px solid ${rep.color};">
+              &#9879; ${user.ecoCredits || 50} pts
+            </span>
+          </div>
+          <p style="color:var(--text-muted); font-size:0.86rem; margin-bottom:1.5rem;">${escapeHTML(t("prof_rank_label"))} <strong>${rep.title}</strong></p>
+
+          <form id="profile-form">
+            <div class="form-group">
+              <label>${escapeHTML(t("prof_role_label"))}</label>
+              <input type="text" class="form-control" value="${escapeHTML(user.role.toUpperCase())}" disabled>
+            </div>
+            <div class="form-group">
+              <label>${escapeHTML(t("prof_email_label"))}</label>
+              <input type="text" class="form-control" value="${escapeHTML(user.email)}" disabled>
+            </div>
+            <div class="form-group">
+              <label for="p-name">${escapeHTML(t("prof_name_label"))}</label>
+              <input type="text" id="p-name" class="form-control" value="${escapeHTML(user.name)}" required>
+            </div>
+            <div class="form-group">
+              <label for="p-lang">${escapeHTML(t("prof_lang_label"))}</label>
+              <select id="p-lang" class="form-control">
+                ${I18nEngine.languages.map(l => `<option value="${l.code}" ${l.code === I18nEngine.currentLang ? "selected" : ""}>${escapeHTML(l.label)}</option>`).join("")}
+              </select>
+            </div>
+
+            <hr style="margin:1.5rem 0; border:none; border-top:1px solid var(--border);">
+            <h4 style="margin-bottom:0.5rem;">${escapeHTML(t("prof_chg_pass"))}</h4>
+            <div class="form-group">
+              <label for="p-curr">${escapeHTML(t("prof_curr_pass"))}</label>
+              <input type="password" id="p-curr" class="form-control" placeholder="Verify existing password">
+            </div>
+            <div class="form-group">
+              <label for="p-new">${escapeHTML(t("prof_new_pass"))}</label>
+              <input type="password" id="p-new" class="form-control" placeholder="Minimum 6 characters">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">${escapeHTML(t("btn_save_changes"))}</button>
+            <div class="form-error" id="p-err" style="margin-top:0.75rem; text-align:center;"></div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("profile-form").onsubmit = async (e) => {
+      e.preventDefault();
+      const errBox = document.getElementById("p-err");
+      errBox.classList.remove("visible");
+
+      const newPass = document.getElementById("p-new").value;
+      const selectedLang = document.getElementById("p-lang").value;
+      if (newPass && newPass.length < 6) {
+        errBox.innerText = "New password must be at least 6 characters.";
+        errBox.classList.add("visible");
+        return;
+      }
+
+      try {
+        const users = Store.getUsers();
+        const u = users.find(x => x.id === user.id);
+        if (newPass) {
+          const check = await hashPassword(document.getElementById("p-curr").value, u.salt);
+          if (check !== u.passHash) throw new Error("Incorrect current password.");
+          u.passHash = await hashPassword(newPass, u.salt);
+        }
+        u.name = document.getElementById("p-name").value;
+        u.preferredLang = selectedLang;
+        Store.setUsers(users);
+
+        const sess = Store.getSession();
+        sess.name = u.name;
+        sess.preferredLang = selectedLang;
+        Store.setSession(sess);
+
+        if (selectedLang !== I18nEngine.currentLang) {
+          I18nEngine.setLang(selectedLang);
+        } else {
+          toast("Profile credentials updated successfully!", "success");
+          Router.renderCurrent();
+        }
+      } catch (err) {
+        errBox.innerText = err.message;
+        errBox.classList.add("visible");
+      }
+    };
+  },
+
+  renderReport(container) {
+    const draft = Store.getDraft() || {};
+    let photos = draft.photos || [];
+
+    container.innerHTML = `
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:1.5rem;">
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div>
+              <h2>${escapeHTML(t("rep_title"))}</h2>
+              <p style="color:var(--text-muted); font-size:0.86rem;">${escapeHTML(t("rep_subtitle"))}</p>
+            </div>
+            <span class="badge badge-assigned" id="draft-pill">&#128190; ${escapeHTML(t("rep_draft_active"))}</span>
+          </div>
+
+          <form id="report-form">
+            <div class="form-group">
+              <label for="rep-type">${escapeHTML(t("rep_type_label"))}</label>
+              <select id="rep-type" class="form-control" required>
+                <option value="">${escapeHTML(t("rep_type_placeholder"))}</option>
+                <option ${draft.type === "Overflowing bin" ? "selected" : ""}>${escapeHTML(t("rep_type_overflow"))}</option>
+                <option ${draft.type === "Garbage on road" ? "selected" : ""}>${escapeHTML(t("rep_type_road"))}</option>
+                <option ${draft.type === "Missed collection" ? "selected" : ""}>${escapeHTML(t("rep_type_missed"))}</option>
+                <option ${draft.type === "Illegal dumping" ? "selected" : ""}>${escapeHTML(t("rep_type_dump"))}</option>
+                <option ${draft.type === "Hazardous dump" ? "selected" : ""}>${escapeHTML(t("rep_type_haz"))}</option>
+                <option ${draft.type === "Other" ? "selected" : ""}>${escapeHTML(t("rep_type_other"))}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="rep-loc">${escapeHTML(t("rep_loc_label"))}</label>
+              <div style="display:flex; gap:0.5rem;">
+                <input type="text" id="rep-loc" class="form-control" required placeholder="Click GIS Map or use GPS" value="${escapeHTML(draft.location || (t("sec_1_name") + " [GIS: 220E, 140N]"))}">
+                <button type="button" class="btn btn-secondary" id="geo-btn" title="Use current GPS">&#128205; GPS</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>${escapeHTML(t("rep_gis_label"))}</label>
+              ${GISMapEngine.render("report-gis-picker", { mode: "picker", width: 460, height: 260 })}
+            </div>
+
+            <div class="form-group">
+              <label for="rep-prio">${escapeHTML(t("rep_prio_label"))}</label>
+              <select id="rep-prio" class="form-control" required>
+                <option ${draft.priority === "Low" ? "selected" : ""}>${escapeHTML(t("rep_prio_low"))}</option>
+                <option ${draft.priority === "Medium" || !draft.priority ? "selected" : ""}>${escapeHTML(t("rep_prio_med"))}</option>
+                <option ${draft.priority === "High" ? "selected" : ""}>${escapeHTML(t("rep_prio_high"))}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="rep-desc">${escapeHTML(t("rep_desc_label"))}</label>
+              <textarea id="rep-desc" class="form-control" rows="3" required placeholder="${escapeHTML(t("rep_desc_placeholder"))}">${escapeHTML(draft.description || "")}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem;">${escapeHTML(t("btn_submit_incident"))}</button>
+          </form>
+        </div>
+
+        <div class="panel">
+          <h3>${escapeHTML(t("ai_lab_title"))}</h3>
+          <p style="color:var(--text-muted); font-size:0.86rem; margin-bottom:1rem;">${escapeHTML(t("ai_lab_subtitle"))}</p>
+
+          <div class="form-group">
+            <input type="file" id="rep-file" accept="image/*" class="form-control" ${photos.length >= 3 ? "disabled" : ""}>
+          </div>
+
+          <div id="ai-scanner-mount">
+            <div style="height:220px; border:2px dashed var(--border); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:0.85rem;">
+              ${escapeHTML(t("ai_lab_attach_prompt"))}
+            </div>
+          </div>
+
+          <div id="photo-previews" style="display:flex; gap:0.6rem; margin-top:1rem; flex-wrap:wrap;"></div>
+        </div>
+      </div>
+    `;
+
+    GISMapEngine.attachControls("report-gis-picker", "rep-loc");
+
+    const aiMount = document.getElementById("ai-scanner-mount");
+    const previewBox = document.getElementById("photo-previews");
+    const fileInput = document.getElementById("rep-file");
+
+    function renderPreviews() {
+      previewBox.innerHTML = photos.map((src, idx) => `
+        <div style="position:relative; width:70px; height:70px; border-radius:6px; overflow:hidden; border:1px solid var(--border);">
+          <img src="${src}" style="width:100%; height:100%; object-fit:cover;">
+          <button type="button" data-del-img="${idx}" style="position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.7); color:#fff; border-radius:50%; width:18px; height:18px; font-size:10px; border:none;">&times;</button>
+        </div>
+      `).join("");
+      fileInput.disabled = photos.length >= 3;
+    }
+    renderPreviews();
+
+    const saveDraftState = () => {
+      Store.setDraft({
+        type: document.getElementById("rep-type").value,
+        location: document.getElementById("rep-loc").value,
+        priority: document.getElementById("rep-prio").value,
+        description: document.getElementById("rep-desc").value,
+        photos: photos
+      });
+    };
+
+    ["rep-type", "rep-loc", "rep-prio", "rep-desc"].forEach(id => {
+      document.getElementById(id).addEventListener("input", saveDraftState);
+    });
+
+    document.getElementById("geo-btn").onclick = () => {
+      AudioEngine.play("click");
+      if (!navigator.geolocation) {
+        toast("Geolocation unsupported in this browser.", "error");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const coords = `${t("sec_1_name")} [GPS: Lat ${pos.coords.latitude.toFixed(4)}, Long ${pos.coords.longitude.toFixed(4)}]`;
+          document.getElementById("rep-loc").value = coords;
+          saveDraftState();
+          toast("Location geotagged via GPS!", "success");
+        },
+        () => toast("Permission denied or GPS offline.", "error")
+      );
+    };
+
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (photos.length >= 3) {
+        toast("Maximum 3 photos permitted.", "error");
+        return;
+      }
+
+      AudioEngine.play("scan");
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxDim = 400;
+          let w = img.width;
+          let h = img.height;
+          if (w > h) {
+            if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+          } else {
+            if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+
+          const imgData = ctx.getImageData(0, 0, w, h);
+          let sumR = 0, sumG = 0, sumB = 0;
+          for (let i = 0; i < imgData.data.length; i += 16) {
+            sumR += imgData.data[i];
+            sumG += imgData.data[i+1];
+            sumB += imgData.data[i+2];
+          }
+          const totalPix = imgData.data.length / 16;
+          const avgG = sumG / totalPix;
+          const avgR = sumR / totalPix;
+
+          let aiPrediction = t("rep_type_overflow");
+          let prob = 89;
+          if (avgG > avgR) { aiPrediction = t("rep_type_road"); prob = 94; }
+          else if (avgR > 140) { aiPrediction = t("rep_type_haz"); prob = 86; }
+
+          aiMount.innerHTML = `
+            <div style="position:relative; border-radius:var(--radius); overflow:hidden; border:1px solid var(--accent); background:#000;">
+              <img src="${dataUrl}" style="width:100%; max-height:220px; object-fit:contain; display:block;">
+              <div style="position:absolute; top:0; left:0; width:100%; height:3px; background:var(--accent); box-shadow:0 0 15px var(--accent); animation: laserScan 2s infinite ease-in-out;"></div>
+              <div style="position:absolute; top:25%; left:25%; width:50%; height:50%; border:2px dashed var(--primary); pointer-events:none;"></div>
+              <div style="position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.85); border:1px solid var(--accent); color:var(--accent); font-family:var(--font-mono); font-size:0.75rem; padding:0.25rem 0.55rem; border-radius:4px;">
+                ${escapeHTML(t("ai_detection_label"))}: ${escapeHTML(aiPrediction)} (${prob}%)
+              </div>
+            </div>
+            <div style="background:var(--bg-elevated); padding:0.75rem; border-radius:var(--radius); margin-top:0.75rem; font-size:0.84rem; display:flex; justify-content:space-between; align-items:center;">
+              <span>${escapeHTML(t("ai_accept_prompt"))} <strong>${escapeHTML(aiPrediction)}</strong>?</span>
+              <button type="button" class="btn btn-primary btn-sm" id="accept-ai-btn">${escapeHTML(t("btn_apply"))}</button>
+            </div>
+          `;
+
+          document.getElementById("accept-ai-btn").onclick = () => {
+            document.getElementById("rep-type").value = aiPrediction;
+            toast("Applied AI recommendation: " + aiPrediction, "info");
+            saveDraftState();
+          };
+
+          photos.push(dataUrl);
+          renderPreviews();
+          saveDraftState();
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+      e.target.value = "";
+    };
+
+    previewBox.onclick = (e) => {
+      const idx = e.target.getAttribute("data-del-img");
+      if (idx !== null) {
+        photos.splice(Number(idx), 1);
+        renderPreviews();
+        saveDraftState();
+      }
+    };
+
+    document.getElementById("report-form").onsubmit = (e) => {
+      e.preventDefault();
+      const user = Auth.getCurrentUser();
+      const items = Store.getItems();
+      const created = new Date().toISOString();
+
+      const newTicket = {
+        id: generateId("REP"),
+        userId: user.id,
+        category: "report",
+        type: document.getElementById("rep-type").value,
+        location: document.getElementById("rep-loc").value.trim(),
+        priority: document.getElementById("rep-prio").value,
+        description: document.getElementById("rep-desc").value.trim(),
+        photos: photos,
+        status: "Pending",
+        timeline: [{ status: "Submitted", timestamp: created, by: user.name }],
+        assignedTeam: null,
+        adminRemark: "",
+        rating: 0,
+        coords: { x: GISMapEngine.pinnedCoords.x, y: GISMapEngine.pinnedCoords.y },
+        createdAt: created,
+        readByCitizen: true,
+        auditLog: [`${created}: Report submitted by ${user.name}`]
+      };
+
+      items.unshift(newTicket);
+      Store.setItems(items);
+      Store.clearDraft();
+      Auth.addCredits(user.id, 20);
+      ConfettiSim.trigger(2500);
+      AudioEngine.play("success");
+      toast("Incident lodged! Awarded +20 Eco-Credits.", "success");
+      Router.navigate("tracking");
+    };
+  },
+
+  renderPickup(container) {
+    const minDate = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+
+    container.innerHTML = `
+      <div style="max-width:640px; margin:0 auto;">
+        <div class="panel">
+          <h2>${escapeHTML(t("pik_title"))}</h2>
+          <p style="color:var(--text-muted); font-size:0.86rem; margin-bottom:1.5rem;">${escapeHTML(t("pik_subtitle"))}</p>
+
+          <form id="pickup-form">
+            <div class="form-group">
+              <label for="pik-type">${escapeHTML(t("pik_type_label"))}</label>
+              <select id="pik-type" class="form-control" required>
+                <option value="">${escapeHTML(t("pik_type_placeholder"))}</option>
+                <option>${escapeHTML(t("pik_type_wet"))}</option>
+                <option>${escapeHTML(t("pik_type_dry"))}</option>
+                <option>${escapeHTML(t("pik_type_haz"))}</option>
+                <option>${escapeHTML(t("pik_type_ewaste"))}</option>
+                <option>${escapeHTML(t("pik_type_bulk"))}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pik-addr">${escapeHTML(t("pik_addr_label"))}</label>
+              <textarea id="pik-addr" class="form-control" rows="2" required placeholder="House/Apartment #, street, landmark...">${escapeHTML(t("sec_1_name") + " [GIS: 220E, 140N]")}</textarea>
+            </div>
+
+            <div class="form-group">
+              <label>${escapeHTML(t("pik_gis_label"))}</label>
+              ${GISMapEngine.render("pickup-gis-picker", { mode: "picker", width: 460, height: 240 })}
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label for="pik-date">${escapeHTML(t("pik_date_label"))}</label>
+                <input type="date" id="pik-date" class="form-control" min="${minDate}" required>
+              </div>
+              <div class="form-group">
+                <label for="pik-slot">${escapeHTML(t("pik_slot_label"))}</label>
+                <select id="pik-slot" class="form-control" required>
+                  <option value="">${escapeHTML(t("pik_slot_select"))}</option>
+                  <option>${escapeHTML(t("pik_slot_morning"))}</option>
+                  <option>${escapeHTML(t("pik_slot_afternoon"))}</option>
+                  <option>${escapeHTML(t("pik_slot_evening"))}</option>
+                </select>
+              </div>
+            </div>
+            <div id="slot-capacity-bar" style="margin-bottom:1rem; font-size:0.84rem;"></div>
+
+            <div class="form-group">
+              <label for="pik-repeat">${escapeHTML(t("pik_repeat_label"))}</label>
+              <select id="pik-repeat" class="form-control">
+                <option>${escapeHTML(t("pik_repeat_onetime"))}</option>
+                <option>${escapeHTML(t("pik_repeat_weekly"))}</option>
+                <option>${escapeHTML(t("pik_repeat_monthly"))}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="pik-notes">${escapeHTML(t("pik_notes_label"))}</label>
+              <input type="text" id="pik-notes" class="form-control" placeholder="e.g. Leave by service lift">
+            </div>
+
+            <button type="submit" id="pik-sub-btn" class="btn btn-primary" style="width:100%;">${escapeHTML(t("btn_sched_pickup"))}</button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    GISMapEngine.attachControls("pickup-gis-picker", "pik-addr");
+
+    const dInput = document.getElementById("pik-date");
+    const sInput = document.getElementById("pik-slot");
+    const capBar = document.getElementById("slot-capacity-bar");
+    const subBtn = document.getElementById("pik-sub-btn");
+
+    function checkCapacity() {
+      const d = dInput.value;
+      const s = sInput.value;
+      if (!d || !s) { capBar.innerHTML = ""; subBtn.disabled = false; return; }
+
+      const existing = Store.getItems().filter(i =>
+        i.category === "pickup" && i.pickupDate === d && i.timeSlot === s && i.status !== "Cancelled"
+      );
+
+      const count = existing.length;
+      if (count >= 3) {
+        capBar.innerHTML = `<span style="color:var(--danger);">&#9888; ${escapeHTML(t("pik_slot_full"))}</span>`;
+        subBtn.disabled = true;
+      } else {
+        capBar.innerHTML = `<span style="color:var(--primary);">&#10003; ${escapeHTML(t("pik_slot_avail"))} (${count}/3).</span>`;
+        subBtn.disabled = false;
+      }
+    }
+
+    dInput.onchange = checkCapacity;
+    sInput.onchange = checkCapacity;
+
+    document.getElementById("pickup-form").onsubmit = (e) => {
+      e.preventDefault();
+      const user = Auth.getCurrentUser();
+      const items = Store.getItems();
+      const created = new Date().toISOString();
+
+      const item = {
+        id: generateId("PIK"),
+        userId: user.id,
+        category: "pickup",
+        wasteType: document.getElementById("pik-type").value,
+        address: document.getElementById("pik-addr").value.trim(),
+        pickupDate: dInput.value,
+        timeSlot: sInput.value,
+        repeat: document.getElementById("pik-repeat").value,
+        notes: document.getElementById("pik-notes").value.trim(),
+        status: "Pending",
+        timeline: [{ status: "Submitted", timestamp: created, by: user.name }],
+        assignedTeam: null,
+        adminRemark: "",
+        rating: 0,
+        coords: { x: GISMapEngine.pinnedCoords.x, y: GISMapEngine.pinnedCoords.y },
+        createdAt: created,
+        readByCitizen: true,
+        auditLog: [`${created}: Pickup scheduled by ${user.name}`]
+      };
+
+      items.unshift(item);
+      Store.setItems(items);
+      Auth.addCredits(user.id, 15);
+      ConfettiSim.trigger(2000);
+      AudioEngine.play("success");
+      toast("Pickup confirmed! +15 Eco-Credits awarded.", "success");
+      Router.navigate("tracking");
+    };
+  },
+
+  renderTracking(container) {
+    const user = Auth.getCurrentUser();
+    let userItems = Store.getItems().filter(i => i.userId === user.id);
+
+    let updated = false;
+    userItems.forEach(i => {
+      if (!i.readByCitizen) { i.readByCitizen = true; updated = true; }
+    });
+    if (updated) Store.setItems(Store.getItems());
+
+    container.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2>${escapeHTML(t("trk_title"))}</h2>
+          <p style="color:var(--text-muted); font-size:0.86rem;">${escapeHTML(t("trk_subtitle"))}</p>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <input type="text" id="trk-search" class="form-control" style="width:180px;" placeholder="${escapeHTML(t("trk_search_placeholder"))}">
+          <select id="trk-filter" class="form-control" style="width:140px;">
+            <option value="ALL">${escapeHTML(t("opt_all_status"))}</option>
+            <option value="Pending">${escapeHTML(t("step_submitted"))}</option>
+            <option value="Assigned">${escapeHTML(t("step_assigned"))}</option>
+            <option value="In Progress">${escapeHTML(t("step_in_progress"))}</option>
+            <option value="Resolved">${escapeHTML(t("step_resolved"))}</option>
+          </select>
+          <select id="trk-sort" class="form-control" style="width:130px;">
+            <option value="NEWEST">${escapeHTML(t("opt_newest"))}</option>
+            <option value="OLDEST">${escapeHTML(t("opt_oldest"))}</option>
+          </select>
+        </div>
+      </div>
+      <div id="tracking-list"></div>
+    `;
+
+    const searchInput = document.getElementById("trk-search");
+    const filterSelect = document.getElementById("trk-filter");
+    const sortSelect = document.getElementById("trk-sort");
+    const listMount = document.getElementById("tracking-list");
+
+    function renderList() {
+      const q = searchInput.value.toLowerCase().trim();
+      const st = filterSelect.value;
+      const sort = sortSelect.value;
+
+      let filtered = userItems.filter(item => {
+        const matchesStatus = (st === "ALL" || item.status === st);
+        const corpus = ((item.id || "") + " " + (item.type || "") + " " + (item.wasteType || "") + " " + (item.location || "") + " " + (item.address || "")).toLowerCase();
+        const matchesSearch = !q || corpus.includes(q);
+        return matchesStatus && matchesSearch;
+      });
+
+      filtered.sort((a, b) => {
+        const tA = new Date(a.createdAt).getTime();
+        const tB = new Date(b.createdAt).getTime();
+        return sort === "NEWEST" ? tB - tA : tA - tB;
+      });
+
+      if (!filtered.length) {
+        listMount.innerHTML = `
+          <div class="panel" style="text-align:center; padding:3rem 1rem;">
+            <p style="color:var(--text-muted); margin-bottom:1rem;">No matching complaints or pickup requests.</p>
+            <button class="btn btn-primary" data-route="report">${escapeHTML(t("nav_report"))}</button>
+          </div>
+        `;
+        return;
+      }
+
+      const steps = ["Submitted", "Assigned", "In Progress", "Resolved"];
+
+      listMount.innerHTML = filtered.map(item => {
+        const isReport = item.category === "report";
+        const currentStepIdx = steps.indexOf(item.status);
+
+        const timelineHtml = `
+          <div class="stepper">
+            ${steps.map((s, idx) => {
+              const hist = item.timeline ? item.timeline.find(tItem => tItem.status === s) : null;
+              const reached = currentStepIdx >= idx;
+              const stepKey = s === "Submitted" ? "step_submitted" : s === "Assigned" ? "step_assigned" : s === "In Progress" ? "step_in_progress" : "step_resolved";
+              return `
+                <div class="stepper-step ${reached ? "active" : ""}">
+                  <div class="stepper-dot">${idx + 1}</div>
+                  <div>${escapeHTML(t(stepKey))}</div>
+                  <div style="font-size:0.68rem; color:var(--text-muted); margin-top:2px;">
+                    ${hist ? formatDate(hist.timestamp) : "--"}
+                  </div>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        `;
+
+        let ratingHtml = "";
+        if (item.status === "Resolved") {
+          ratingHtml = `
+            <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px dashed var(--border); display:flex; align-items:center; gap:0.6rem;">
+              <span style="font-size:0.86rem; font-weight:600;">${escapeHTML(t("rating_label"))}</span>
+              <div style="cursor:pointer; font-size:1.3rem;">
+                ${[1, 2, 3, 4, 5].map(star => `
+                  <span data-action="rate-item" data-id="${item.id}" data-val="${star}" style="color:${star <= item.rating ? "#eab308" : "var(--border)"};">&#9733;</span>
+                `).join("")}
+              </div>
+            </div>
+          `;
+        }
+
+        let pendingButtons = "";
+        if (item.status === "Pending") {
+          if (!isReport) {
+            pendingButtons = `
+              <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                <button class="btn btn-secondary btn-sm" data-action="resched-pickup" data-id="${item.id}">${escapeHTML(t("btn_resched"))}</button>
+                <button class="btn btn-danger btn-sm" data-action="cancel-item" data-id="${item.id}">${escapeHTML(t("btn_cancel"))}</button>
+              </div>
+            `;
+          } else {
+            pendingButtons = `
+              <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                <button class="btn btn-danger btn-sm" data-action="cancel-item" data-id="${item.id}">${escapeHTML(t("btn_withdraw"))}</button>
+              </div>
+            `;
+          }
+        }
+
+        return `
+          <div class="panel" style="margin-bottom:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:0.5rem;">
+              <div>
+                <span class="badge ${isReport ? "badge-assigned" : "badge-in_progress"}" style="margin-right:0.4rem;">
+                  ${isReport ? escapeHTML(t("badge_report")) : escapeHTML(t("badge_pickup"))}
+                </span>
+                <span class="badge badge-${item.status.toLowerCase().replace(" ", "_")}">${item.status}</span>
+                <h3 style="margin-top:0.4rem;">${escapeHTML(isReport ? item.type : item.wasteType)}</h3>
+                <p style="color:var(--text-muted); font-size:0.82rem;">Tracking Ref: ${escapeHTML(item.id)} &bull; ${formatDate(item.createdAt)}</p>
+              </div>
+              <div style="text-align:right;">
+                <button class="btn btn-secondary btn-sm" data-action="inspect-gis-item" data-id="${item.id}">&#128205; ${escapeHTML(t("btn_inspect_gis"))}</button>
+                ${item.assignedTeam ? `<div style="font-weight:700; color:var(--accent); font-size:0.85rem; margin-top:0.35rem;">Unit: ${escapeHTML(item.assignedTeam)}</div>` : ""}
+              </div>
+            </div>
+
+            <div style="margin:0.85rem 0; font-size:0.9rem;">
+              <p><strong>Location / Waypoint:</strong> ${escapeHTML(item.location || item.address)}</p>
+              ${isReport ? `
+                <p><strong>Priority:</strong> ${escapeHTML(item.priority)} &bull; <strong>Details:</strong> ${escapeHTML(item.description)}</p>
+              ` : `
+                <p><strong>Window:</strong> ${escapeHTML(item.pickupDate)} (${escapeHTML(item.timeSlot)}) &bull; <strong>Frequency:</strong> ${escapeHTML(item.repeat)}</p>
+              `}
+              ${item.adminRemark ? `
+                <div style="background:var(--bg-elevated); padding:0.65rem 0.85rem; border-radius:var(--radius); margin-top:0.6rem; font-size:0.86rem; border-left:4px solid var(--primary);">
+                  <strong>Admin Update:</strong> ${escapeHTML(item.adminRemark)}
+                </div>
+              ` : ""}
+            </div>
+
+            ${item.photos && item.photos.length ? `
+              <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                ${item.photos.map(p => `<img src="${p}" style="width:55px; height:55px; object-fit:cover; border-radius:6px; border:1px solid var(--border);">`).join("")}
+              </div>
+            ` : ""}
+
+            ${timelineHtml}
+            ${ratingHtml}
+            ${pendingButtons}
+          </div>
+        `;
+      }).join("");
+    }
+
+    searchInput.oninput = renderList;
+    filterSelect.onchange = renderList;
+    sortSelect.onchange = renderList;
+    renderList();
+  },
+
+  renderAdmin(container) {
+    let items = Store.getItems();
+
+    container.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h2>${escapeHTML(t("adm_title"))}</h2>
+          <p style="color:var(--text-muted); font-size:0.86rem;">${escapeHTML(t("adm_subtitle"))}</p>
+        </div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;" class="no-print">
+          <button class="btn btn-secondary btn-sm" data-action="admin-seed">&#128260; ${escapeHTML(t("btn_load_demo"))}</button>
+          <button class="btn btn-secondary btn-sm" data-action="admin-reset">&#9851; ${escapeHTML(t("btn_purge_data"))}</button>
+          <button class="btn btn-secondary btn-sm" data-action="admin-export">&#128190; ${escapeHTML(t("btn_export_csv"))}</button>
+          <button class="btn btn-secondary btn-sm" data-action="admin-print">&#128424; ${escapeHTML(t("btn_print_report"))}</button>
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:1.5rem;" id="admin-kpis"></div>
+
+      <div class="panel" style="margin-bottom:1.5rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+          <div>
+            <h4>${escapeHTML(t("adm_radar_title"))}</h4>
+            <span style="font-size:0.78rem; color:var(--text-muted);">${escapeHTML(t("adm_radar_subtitle"))}</span>
+          </div>
+          <button class="btn btn-primary btn-sm" id="btn-run-fleet-optimizer">&#128666; ${escapeHTML(t("btn_run_fleet_opt"))}</button>
+        </div>
+
+        ${GISMapEngine.render("admin-gis-radar", { mode: "radar", width: 460, height: 360, items: items })}
+      </div>
+
+      <div class="grid-3" style="margin-bottom:1.5rem;">
+        <div class="panel">
+          <h4 style="margin-bottom:0.75rem;">${escapeHTML(t("adm_chart_status"))}</h4>
+          <div id="chart-status" style="min-height:180px; display:flex; align-items:center; justify-content:center;"></div>
+        </div>
+        <div class="panel">
+          <h4 style="margin-bottom:0.75rem;">${escapeHTML(t("adm_chart_types"))}</h4>
+          <div id="chart-types" style="min-height:180px; display:flex; align-items:center; justify-content:center;"></div>
+        </div>
+        <div class="panel">
+          <h4 style="margin-bottom:0.75rem;">${escapeHTML(t("adm_chart_velocity"))}</h4>
+          <div id="chart-trend" style="min-height:180px; display:flex; align-items:center; justify-content:center;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;" class="no-print">
+          <h4>${escapeHTML(t("adm_tbl_title"))}</h4>
+          <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <input type="text" id="adm-search" class="form-control" style="width:170px;" placeholder="Search records...">
+            <select id="adm-filter-status" class="form-control" style="width:130px;">
+              <option value="ALL">${escapeHTML(t("opt_all_status"))}</option>
+              <option value="Pending">${escapeHTML(t("step_submitted"))}</option>
+              <option value="Assigned">${escapeHTML(t("step_assigned"))}</option>
+              <option value="In Progress">${escapeHTML(t("step_in_progress"))}</option>
+              <option value="Resolved">${escapeHTML(t("step_resolved"))}</option>
+            </select>
+            <select id="adm-filter-cat" class="form-control" style="width:130px;">
+              <option value="ALL">All Categories</option>
+              <option value="report">Reports</option>
+              <option value="pickup">Pickups</option>
+            </select>
+          </div>
+        </div>
+        <div style="width:100%; overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:0.86rem;">
+            <thead>
+              <tr style="text-align:left; border-bottom:1px solid var(--border); color:var(--text-muted);">
+                <th style="padding:0.6rem;">${escapeHTML(t("adm_tbl_id"))}</th>
+                <th>${escapeHTML(t("adm_tbl_type"))}</th>
+                <th>${escapeHTML(t("adm_tbl_loc"))}</th>
+                <th>${escapeHTML(t("adm_tbl_time"))}</th>
+                <th>${escapeHTML(t("adm_tbl_status"))}</th>
+                <th>${escapeHTML(t("adm_tbl_unit"))}</th>
+                <th class="no-print">${escapeHTML(t("adm_tbl_action"))}</th>
+              </tr>
+            </thead>
+            <tbody id="adm-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    `;
+
+    GISMapEngine.attachControls("admin-gis-radar");
+
+    function updateAdminDashboard() {
+      items = Store.getItems();
+      const now = Date.now();
+      const total = items.length;
+      const pending = items.filter(i => i.status === "Pending").length;
+
+      const overdue = items.filter(i => {
+        if (i.status !== "Pending") return false;
+        return (now - new Date(i.createdAt).getTime()) / (1000 * 3600 * 24) > 3;
+      }).length;
+
+      const resolved = items.filter(i => i.status === "Resolved");
+      let avgHours = 0;
+      if (resolved.length) {
+        const totalMs = resolved.reduce((acc, it) => {
+          const rh = it.timeline ? it.timeline.find(tItem => tItem.status === "Resolved") : null;
+          return rh ? acc + (new Date(rh.timestamp).getTime() - new Date(it.createdAt).getTime()) : acc;
+        }, 0);
+        avgHours = Math.round(totalMs / (resolved.length * 3600000));
+      }
+
+      document.getElementById("admin-kpis").innerHTML = `
+        <div class="panel" style="text-align:center;">
+          <div style="font-size:2rem; font-weight:800; font-family:var(--font-mono);">${total}</div>
+          <div style="font-size:0.82rem; color:var(--text-muted);">${escapeHTML(t("adm_kpi_total"))}</div>
+        </div>
+        <div class="panel" style="text-align:center;">
+          <div style="font-size:2rem; font-weight:800; color:var(--warning); font-family:var(--font-mono);">${pending}</div>
+          <div style="font-size:0.82rem; color:var(--text-muted);">${escapeHTML(t("adm_kpi_pending"))}</div>
+        </div>
+        <div class="panel" style="text-align:center; ${overdue > 0 ? "border-color:var(--danger); background:rgba(239,68,68,0.1);" : ""}">
+          <div style="font-size:2rem; font-weight:800; color:var(--danger); font-family:var(--font-mono);">${overdue}</div>
+          <div style="font-size:0.82rem; color:var(--danger);">${escapeHTML(t("adm_kpi_overdue"))}</div>
+        </div>
+        <div class="panel" style="text-align:center;">
+          <div style="font-size:2rem; font-weight:800; color:var(--accent); font-family:var(--font-mono);">${avgHours}h</div>
+          <div style="font-size:0.82rem; color:var(--text-muted);">${escapeHTML(t("adm_kpi_turnaround"))}</div>
+        </div>
+      `;
+
+      const donutData = [
+        { label: "Pending", value: items.filter(i => i.status === "Pending").length, color: "#f59e0b" },
+        { label: "Assigned", value: items.filter(i => i.status === "Assigned").length, color: "#06b6d4" },
+        { label: "In Progress", value: items.filter(i => i.status === "In Progress").length, color: "#8b5cf6" },
+        { label: "Resolved", value: items.filter(i => i.status === "Resolved").length, color: "#10b981" }
+      ];
+      document.getElementById("chart-status").innerHTML = UI.drawDonut(donutData);
+
+      const reports = items.filter(i => i.category === "report");
+      const counts = {};
+      reports.forEach(r => { counts[r.type] = (counts[r.type] || 0) + 1; });
+      const barData = Object.keys(counts).map(k => ({ label: k, value: counts[k] }));
+      document.getElementById("chart-types").innerHTML = UI.drawBars(barData);
+
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now - i * 86400000);
+        const iso = d.toISOString().split("T")[0];
+        const c = items.filter(it => it.createdAt && it.createdAt.startsWith(iso)).length;
+        days.push({ label: (d.getMonth() + 1) + "/" + d.getDate(), val: c });
+      }
+      document.getElementById("chart-trend").innerHTML = UI.drawTrend(days);
+
+      renderAdminTable();
+    }
+
+    function renderAdminTable() {
+      const q = document.getElementById("adm-search").value.toLowerCase().trim();
+      const st = document.getElementById("adm-filter-status").value;
+      const cat = document.getElementById("adm-filter-cat").value;
+      const tbody = document.getElementById("adm-table-body");
+
+      const filtered = items.filter(it => {
+        const matchStatus = (st === "ALL" || it.status === st);
+        const matchCat = (cat === "ALL" || it.category === cat);
+        const corpus = ((it.id || "") + " " + (it.type || "") + " " + (it.wasteType || "") + " " + (it.location || "") + " " + (it.address || "")).toLowerCase();
+        const matchSearch = !q || corpus.includes(q);
+        return matchStatus && matchCat && matchSearch;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No matching incidents logged.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(it => `
+        <tr style="border-bottom:1px solid var(--border);">
+          <td style="padding:0.6rem;"><strong>${escapeHTML(it.id)}</strong></td>
+          <td>${escapeHTML(it.type || it.wasteType)}</td>
+          <td>${escapeHTML(it.location || it.address)}</td>
+          <td><small>${formatDate(it.createdAt)}</small></td>
+          <td><span class="badge badge-${it.status.toLowerCase().replace(" ", "_")}">${it.status}</span></td>
+          <td><strong>${escapeHTML(it.assignedTeam || "Unassigned")}</strong></td>
+          <td class="no-print">
+            <div style="display:flex; gap:0.3rem;">
+              <button class="btn btn-secondary btn-sm" data-action="admin-triage" data-id="${it.id}">${escapeHTML(t("btn_triage"))}</button>
+              <button class="btn btn-danger btn-sm" data-action="admin-del" data-id="${it.id}">&times;</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    document.getElementById("adm-search").oninput = renderAdminTable;
+    document.getElementById("adm-filter-status").onchange = renderAdminTable;
+    document.getElementById("adm-filter-cat").onchange = renderAdminTable;
+
+    document.getElementById("btn-run-fleet-optimizer").onclick = () => {
+      AudioEngine.play("scan");
+      const unres = items.filter(i => i.status !== "Resolved" && i.coords);
+      if (!unres.length) {
+        toast("No active unresolved incidents to route.", "info");
+        return;
+      }
+
+      let current = { x: 225, y: 165 };
+      const unvisited = [...unres];
+      const route = [current];
+
+      while (unvisited.length > 0) {
+        let nearestIdx = 0;
+        let minDst = Infinity;
+        for (let i = 0; i < unvisited.length; i++) {
+          const dx = unvisited[i].coords.x - current.x;
+          const dy = unvisited[i].coords.y - current.y;
+          const d = Math.sqrt(dx * dx + dy * dy);
+          if (d < minDst) { minDst = d; nearestIdx = i; }
+        }
+        current = unvisited[nearestIdx].coords;
+        route.push(current);
+        unvisited.splice(nearestIdx, 1);
+      }
+      route.push({ x: 225, y: 165 });
+
+      const dStr = route.reduce((acc, pt, i) => `${acc} ${i === 0 ? "M" : "L"} ${pt.x} ${pt.y}`, "");
+      const pathEl = document.getElementById("admin-gis-radar-tsp-trajectory");
+      if (pathEl) pathEl.setAttribute("d", dStr);
+      toast(`AI Optimized Loop: Routed ${unres.length} incident waypoints for compactor fleet!`, "success");
+    };
+
+    updateAdminDashboard();
+  },
+
+  drawDonut(data, size = 180) {
+    const total = data.reduce((a, b) => a + b.value, 0);
+    if (!total) return `<svg width="${size}" height="${size}" viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="var(--border)" stroke-width="18"/><text x="50" y="54" text-anchor="middle" font-size="9" fill="var(--text-muted)">Empty</text></svg>`;
+
+    let cur = 0;
+    const slices = data.map(d => {
+      const angle = (d.value / total) * 360;
+      const start = cur;
+      cur += angle;
+      const r = 36;
+      const x1 = 50 + r * Math.cos(((start - 90) * Math.PI) / 180);
+      const y1 = 50 + r * Math.sin(((start - 90) * Math.PI) / 180);
+      const x2 = 50 + r * Math.cos(((cur - 90) * Math.PI) / 180);
+      const y2 = 50 + r * Math.sin(((cur - 90) * Math.PI) / 180);
+      const large = angle > 180 ? 1 : 0;
+      return angle >= 359.9
+        ? `<circle cx="50" cy="50" r="${r}" fill="none" stroke="${d.color}" stroke-width="18"/>`
+        : `<path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${d.color}" stroke-width="18"/>`;
+    });
+
+    return `
+      <svg width="${size}" height="${size}" viewBox="0 0 100 100">
+        ${slices.join("")}
+        <text x="50" y="49" text-anchor="middle" font-weight="800" font-size="12" fill="var(--text)" font-family="var(--font-mono)">${total}</text>
+        <text x="50" y="61" text-anchor="middle" font-size="7" fill="var(--text-muted)">LOGS</text>
+      </svg>
+    `;
+  },
+
+  drawBars(data, width = 280, height = 140) {
+    if (!data.length) return `<p style="color:var(--text-muted);font-size:0.8rem;">No categories</p>`;
+    const max = Math.max(...data.map(d => d.value), 1);
+    const barWidth = Math.floor((width - 40) / data.length);
+    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}">`;
+    svg += `<line x1="25" y1="${height - 25}" x2="${width - 10}" y2="${height - 25}" stroke="var(--border)" stroke-width="1"/>`;
+
+    data.forEach((d, i) => {
+      const h = (d.value / max) * (height - 50);
+      const x = 30 + i * barWidth;
+      const y = height - 25 - h;
+      svg += `
+        <rect x="${x}" y="${y}" width="${Math.max(barWidth - 8, 4)}" height="${h}" fill="var(--primary)" rx="3"/>
+        <text x="${x + (barWidth - 8) / 2}" y="${y - 4}" font-size="9" font-weight="700" text-anchor="middle" fill="var(--text)" font-family="var(--font-mono)">${d.value}</text>
+        <text x="${x + (barWidth - 8) / 2}" y="${height - 10}" font-size="7.5" text-anchor="middle" fill="var(--text-muted)">${escapeHTML(d.label.slice(0, 5))}</text>
+      `;
+    });
+    svg += `</svg>`;
+    return svg;
+  },
+
+  drawTrend(points, width = 280, height = 130) {
+    if (!points.length) return `<p style="color:var(--text-muted);font-size:0.8rem;">No trend data</p>`;
+    const max = Math.max(...points.map(p => p.val), 1);
+    const step = (width - 40) / (points.length - 1 || 1);
+    const coords = points.map((p, i) => ({
+      x: 25 + i * step,
+      y: height - 25 - (p.val / max) * (height - 45),
+      label: p.label,
+      val: p.val
+    }));
+    const dStr = coords.reduce((acc, c, i) => `${acc} ${i === 0 ? "M" : "L"} ${c.x} ${c.y}`, "");
+
+    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}">`;
+    svg += `<line x1="20" y1="${height - 25}" x2="${width - 10}" y2="${height - 25}" stroke="var(--border)" stroke-width="1"/>`;
+    svg += `<path d="${dStr}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>`;
+    coords.forEach(c => {
+      svg += `
+        <circle cx="${c.x}" cy="${c.y}" r="3.5" fill="var(--bg-surface)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="${c.x}" y="${height - 10}" font-size="8" text-anchor="middle" fill="var(--text-muted)" font-family="var(--font-mono)">${escapeHTML(c.label)}</text>
+      `;
+    });
+    svg += `</svg>`;
+    return svg;
+  },
+
+  renderAwareness(container) {
+    const items = Store.getItems();
+    const resolved = items.filter(i => i.status === "Resolved").length;
+    const divertedKg = resolved * 32;
+
+    const tips = [
+      "Always clean aluminum beverage cans before placing in the Dry Bin to avoid fruit fly contamination.",
+      "Rechargeable lithium cells cause explosive compactor truck fires - deposit only at designated hazardous points.",
+      "Home organic waste composting diverts up to 45% of municipal solid waste away from unmanaged dumps.",
+      "Flatten all corrugated packing boxes prior to collection to maximize vehicle compaction volume.",
+      "Expired blister-pack tablets must never be flushed into toilets to avoid polluting ground aquifers.",
+      "Electronics containing printed circuit boards possess recoverable gold and copper - separate under E-Waste."
+    ];
+    const dailyTip = tips[new Date().getDate() % tips.length];
+
+    const directory = [
+      { name: "Banana Peels & Vegetable Rinds", bin: t("aw_bin_wet"), color: "#10b981" },
+      { name: "Corrugated Cardboard Box", bin: t("aw_bin_dry"), color: "#06b6d4" },
+      { name: "Aluminum Soda Cans", bin: t("aw_bin_dry"), color: "#06b6d4" },
+      { name: "Old Laptop Battery Pack", bin: t("aw_bin_haz"), color: "#ef4444" },
+      { name: "Broken Phone Charger Wire", bin: t("aw_bin_ewaste"), color: "#8b5cf6" },
+      { name: "Glass Pickling Jar (Rinsed)", bin: t("aw_bin_dry"), color: "#06b6d4" },
+      { name: "Expired Cough Syrup Bottles", bin: t("aw_bin_haz"), color: "#ef4444" },
+      { name: "Used Tea Bags & Grounds", bin: t("aw_bin_wet"), color: "#10b981" },
+      { name: "Computer Mouse & Keyboards", bin: t("aw_bin_ewaste"), color: "#8b5cf6" },
+      { name: "Insecticide Aerosol Spray", bin: t("aw_bin_haz"), color: "#ef4444" },
+      { name: "Pruned Garden Leaves", bin: t("aw_bin_wet"), color: "#10b981" },
+      { name: "Tetra Pak Milk Cartons", bin: t("aw_bin_dry"), color: "#06b6d4" },
+      { name: "Cracked Smartphone Screen", bin: t("aw_bin_ewaste"), color: "#8b5cf6" },
+      { name: "Eggshells & Crusts", bin: t("aw_bin_wet"), color: "#10b981" },
+      { name: "Paint Thinner Canister", bin: t("aw_bin_haz"), color: "#ef4444" },
+      { name: "Styrofoam Packing Shapes", bin: t("aw_bin_dry"), color: "#06b6d4" },
+      { name: "Discarded Microwave Oven", bin: t("aw_bin_ewaste"), color: "#8b5cf6" },
+      { name: "Sanitary Wipes & Diapers", bin: t("aw_bin_haz"), color: "#ef4444" },
+      { name: "Cooked Rice & Dal Leftovers", bin: t("aw_bin_wet"), color: "#10b981" },
+      { name: "Plastic Shampoo Bottles", bin: t("aw_bin_dry"), color: "#06b6d4" }
+    ];
+
+    container.innerHTML = `
+      <div style="margin-bottom:1.5rem;">
+        <h2>${escapeHTML(t("aw_title"))}</h2>
+        <p style="color:var(--text-muted); font-size:0.86rem;">${escapeHTML(t("aw_subtitle"))}</p>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:1.5rem;">
+        <div class="panel" style="border-left:5px solid var(--primary);">
+          <h4 style="color:var(--primary);">&#128161; ${escapeHTML(t("aw_daily_directive"))}</h4>
+          <p style="margin-top:0.4rem; font-size:0.92rem;">${dailyTip}</p>
+        </div>
+        <div class="panel" style="border-left:5px solid var(--accent);">
+          <h4 style="color:var(--accent);">&#127793; ${escapeHTML(t("aw_impact_title"))}</h4>
+          <p style="margin-top:0.4rem; font-size:0.92rem;">
+            Through ${resolved} confirmed dispatches, citizens have diverted <strong>${divertedKg} kg</strong> of municipal solid waste!
+          </p>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom:1rem;">${escapeHTML(t("aw_bin_standards"))}</h3>
+      <div class="grid-4" style="margin-bottom:2rem;">
+        <div class="panel" style="border-top:5px solid #10b981;">
+          <h4 style="color:#10b981;">${escapeHTML(t("aw_bin_wet"))}</h4>
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin:0.3rem 0;">GREEN BIN</p>
+          <ul style="font-size:0.82rem; padding-left:1.2rem; color:var(--text-muted);">
+            <li>Fruit &amp; vegetable rinds</li>
+            <li>Cooked meal scraps</li>
+            <li>Tea leaves &amp; coffee grounds</li>
+            <li>Garden pruned twigs</li>
+          </ul>
+        </div>
+        <div class="panel" style="border-top:5px solid #06b6d4;">
+          <h4 style="color:#06b6d4;">${escapeHTML(t("aw_bin_dry"))}</h4>
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin:0.3rem 0;">BLUE BIN</p>
+          <ul style="font-size:0.82rem; padding-left:1.2rem; color:var(--text-muted);">
+            <li>Cardboard &amp; papers</li>
+            <li>Beverage cans &amp; bottles</li>
+            <li>Glass condiment jars</li>
+            <li>Clean food containers</li>
+          </ul>
+        </div>
+        <div class="panel" style="border-top:5px solid #ef4444;">
+          <h4 style="color:#ef4444;">${escapeHTML(t("aw_bin_haz"))}</h4>
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin:0.3rem 0;">RED BIN</p>
+          <ul style="font-size:0.82rem; padding-left:1.2rem; color:var(--text-muted);">
+            <li>Lithium &amp; alkaline batteries</li>
+            <li>Expired medical blister strips</li>
+            <li>Insecticides &amp; paints</li>
+            <li>Sanitary disposals</li>
+          </ul>
+        </div>
+        <div class="panel" style="border-top:5px solid #8b5cf6;">
+          <h4 style="color:#8b5cf6;">${escapeHTML(t("aw_bin_ewaste"))}</h4>
+          <p style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin:0.3rem 0;">PURPLE BIN</p>
+          <ul style="font-size:0.82rem; padding-left:1.2rem; color:var(--text-muted);">
+            <li>Power cords &amp; adaptors</li>
+            <li>Broken mobile devices</li>
+            <li>Peripherals &amp; mice</li>
+            <li>Circuit boards</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-bottom:2rem;">
+        <h3>${escapeHTML(t("aw_dir_title"))}</h3>
+        <p style="color:var(--text-muted); font-size:0.86rem; margin-bottom:1rem;">${escapeHTML(t("aw_dir_subtitle"))}</p>
+        <input type="text" id="dir-input" class="form-control" placeholder="${escapeHTML(t("aw_dir_placeholder"))}" style="max-width:380px; margin-bottom:1rem;">
+        <div class="grid-3" id="dir-mount"></div>
+      </div>
+
+      <div class="panel" id="quiz-mount"></div>
+    `;
+
+    const dirInput = document.getElementById("dir-input");
+    const dirMount = document.getElementById("dir-mount");
+
+    function renderDir() {
+      const q = dirInput.value.toLowerCase().trim();
+      const matched = directory.filter(i => !q || i.name.toLowerCase().includes(q));
+      if (!matched.length) {
+        dirMount.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;">No items matched query.</p>`;
+        return;
+      }
+      dirMount.innerHTML = matched.map(it => `
+        <div style="background:var(--bg-elevated); padding:0.75rem 1rem; border-radius:var(--radius); display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border);">
+          <span style="font-size:0.88rem; font-weight:600;">${escapeHTML(it.name)}</span>
+          <span class="badge" style="background:${it.color}; color:#fff;">${escapeHTML(it.bin)}</span>
+        </div>
+      `).join("");
+    }
+    dirInput.oninput = renderDir;
+    renderDir();
+
+    QuizEngine.init(document.getElementById("quiz-mount"));
+  }
+};
+
+/* ========================================================================== */
+/* ===== 10-ROUND GAMIFIED SORTING QUIZ ENGINE ============================== */
+/* ========================================================================== */
+
+const QuizEngine = {
+  questions: [
+    { item: "Crushed aluminum soda can", correct: "Dry", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Vegetable peels & used tea bags", correct: "Wet", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Used lithium smartphone battery", correct: "Hazardous", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Frayed USB charging cord", correct: "E-Waste", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Cardboard courier box (flattened)", correct: "Dry", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Expired prescription pills", correct: "Hazardous", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Cooked rice and stew leftovers", correct: "Wet", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Broken computer mouse", correct: "E-Waste", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Glass tomato ketchup jar (rinsed)", correct: "Dry", options: ["Wet", "Dry", "Hazardous", "E-Waste"] },
+    { item: "Pressurized insect repellent can", correct: "Hazardous", options: ["Wet", "Dry", "Hazardous", "E-Waste"] }
+  ],
+  idx: 0,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+
+  init(container) {
+    this.container = container;
+    this.idx = 0;
+    this.score = 0;
+    this.streak = 0;
+    this.render();
+  },
+
+  render() {
+    if (this.idx >= this.questions.length) {
+      this.renderCompletion();
+      return;
+    }
+    const q = this.questions[this.idx];
+
+    this.container.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h3>${escapeHTML(t("quiz_title"))}</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem;">${escapeHTML(t("quiz_subtitle"))}</p>
+        </div>
+        <div style="font-size:0.88rem; display:flex; gap:1.2rem; font-family:var(--font-mono);">
+          <span>Round: <strong>${this.idx + 1} / ${this.questions.length}</strong></span>
+          <span>Score: <strong>${this.score} pts</strong></span>
+          <span>Streak: <strong style="color:var(--primary);">${this.streak}</strong> (Best: ${this.bestStreak})</span>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-elevated); padding:1.25rem; border-radius:var(--radius); margin:1.25rem 0; border:1px solid var(--border);">
+        <p style="font-size:1.15rem; font-weight:600;">
+          ${escapeHTML(t("quiz_question_prompt"))} <span style="color:var(--primary); text-decoration:underline;">${escapeHTML(q.item)}</span>?
+        </p>
+      </div>
+
+      <div class="grid-2" style="gap:0.75rem;">
+        ${q.options.map(opt => `
+          <button class="btn btn-secondary" data-action="quiz-choice" data-val="${opt}" style="padding:1rem; font-size:1rem; justify-content:flex-start;">
+            ${opt === "Wet" ? "&#127793; " + escapeHTML(t("aw_bin_wet")) : opt === "Dry" ? "&#9851; " + escapeHTML(t("aw_bin_dry")) : opt === "Hazardous" ? "&#9762; " + escapeHTML(t("aw_bin_haz")) : "&#128268; " + escapeHTML(t("aw_bin_ewaste"))}
+          </button>
+        `).join("")}
+      </div>
+      <div id="quiz-msg" style="margin-top:1rem; font-weight:700; min-height:24px;"></div>
+    `;
+  },
+
+  handleAnswer(choice) {
+    const q = this.questions[this.idx];
+    const msg = document.getElementById("quiz-msg");
+    const isCorrect = (choice === q.correct);
+
+    if (isCorrect) {
+      AudioEngine.play("success");
+      this.score += 10;
+      this.streak++;
+      if (this.streak > this.bestStreak) this.bestStreak = this.streak;
+      msg.innerHTML = `<span style="color:var(--primary);">&#10003; Correct! Belongs in the ${q.correct} bin.</span>`;
+    } else {
+      AudioEngine.play("error");
+      this.streak = 0;
+      msg.innerHTML = `<span style="color:var(--danger);">&#10007; Incorrect. Target bin: ${q.correct}.</span>`;
+    }
+
+    setTimeout(() => {
+      this.idx++;
+      this.render();
+    }, 900);
+  },
+
+  renderCompletion() {
+    ConfettiSim.trigger(3000);
+    AudioEngine.play("success");
+    const u = Auth.getCurrentUser();
+    if (u) Auth.addCredits(u.id, this.score);
+
+    this.container.innerHTML = `
+      <div style="text-align:center; padding:2.5rem 1rem;">
+        <h3 style="font-size:1.8rem; margin-bottom:0.5rem;">Challenge Completed!</h3>
+        <p style="color:var(--text-muted); margin-bottom:1.5rem;">
+          Final Score: <strong>${this.score} / ${this.questions.length * 10} pts</strong> &bull; Longest Streak: <strong>${this.bestStreak}</strong>
+        </p>
+        <p style="color:var(--primary); font-weight:700; margin-bottom:1.5rem;">
+          &#9879; +${this.score} Eco-Credits added to your citizen reputation profile!
+        </p>
+        <button class="btn btn-primary" data-action="quiz-restart">Play Challenge Again</button>
+      </div>
+    `;
+  }
+};
+
+/* ========================================================================== */
+/* ===== GLOBAL EVENT DELEGATION & GIS INSPECTION =========================== */
+/* ========================================================================== */
+
+document.addEventListener("click", (e) => {
+  const routeTarget = e.target.closest("[data-route]");
+  if (routeTarget) {
+    e.preventDefault();
+    Router.navigate(routeTarget.getAttribute("data-route"));
+    return;
+  }
+
+  const actTarget = e.target.closest("[data-action]");
+  if (!actTarget) return;
+  const action = actTarget.getAttribute("data-action");
+
+  switch (action) {
+    case "logout":
+      Auth.logout();
+      toast("Signed out successfully.", "info");
+      break;
+
+    case "close-modal":
+      document.getElementById("modal-container").innerHTML = "";
+      break;
+
+    case "gis-zoom-in": {
+      const target = actTarget.getAttribute("data-target");
+      GISMapEngine.zoom(target, 0.2);
+      break;
+    }
+
+    case "gis-zoom-out": {
+      const target = actTarget.getAttribute("data-target");
+      GISMapEngine.zoom(target, -0.2);
+      break;
+    }
+
+    case "gis-zoom-reset": {
+      const target = actTarget.getAttribute("data-target");
+      GISMapEngine.zoom(target, 0);
+      break;
+    }
+
+    case "quiz-choice":
+      QuizEngine.handleAnswer(actTarget.getAttribute("data-val"));
+      break;
+
+    case "quiz-restart":
+      QuizEngine.init(document.getElementById("quiz-mount"));
+      break;
+
+    case "inspect-gis-item": {
+      const id = actTarget.getAttribute("data-id");
+      const items = Store.getItems();
+      const targetItem = items.find(i => i.id === id);
+      if (!targetItem) return;
+
+      const modal = document.getElementById("modal-container");
+      modal.innerHTML = `
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:9999;">
+          <div class="panel" style="max-width:540px;width:95%;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+              <h3>Municipal GIS Incident Inspector</h3>
+              <button class="btn btn-secondary btn-sm" data-action="close-modal">&times;</button>
+            </div>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1rem;">Target: <strong>${escapeHTML(targetItem.id)}</strong> (${escapeHTML(targetItem.type || targetItem.wasteType)})</p>
+            ${GISMapEngine.render("modal-gis-inspector", { mode: "inspector", width: 460, height: 260, selectedItem: targetItem })}
+            <div style="margin-top:1rem;display:flex;justify-content:flex-end;">
+              <button class="btn btn-primary btn-sm" data-action="close-modal">Done</button>
+            </div>
+          </div>
+        </div>
+      `;
+      GISMapEngine.attachControls("modal-gis-inspector");
+      break;
+    }
+
+    case "gis-pin-inspect": {
+      const id = actTarget.getAttribute("data-id");
+      const items = Store.getItems();
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      AudioEngine.play("click");
+      const hud = document.getElementById("admin-gis-radar-hud");
+      if (hud) {
+        document.getElementById("admin-gis-radar-hud-title").innerText = `${item.id}: ${item.type || item.wasteType}`;
+        document.getElementById("admin-gis-radar-hud-desc").innerText = `${item.location || item.address} - Unit: ${item.assignedTeam || "None"}`;
+        document.getElementById("admin-gis-radar-hud-status").innerHTML = `<span class="badge badge-${item.status.toLowerCase().replace(" ", "_")}">${item.status}</span>`;
+        hud.style.display = "block";
+      }
+      break;
+    }
+
+    case "rate-item": {
+      const id = actTarget.getAttribute("data-id");
+      const val = parseInt(actTarget.getAttribute("data-val"), 10);
+      const items = Store.getItems();
+      const target = items.find(i => i.id === id);
+      if (target) {
+        target.rating = val;
+        Store.setItems(items);
+        AudioEngine.play("success");
+        ConfettiSim.trigger(2000);
+        toast(`Rated resolution ${val} / 5 stars. Thank you!`, "success");
+        Router.renderCurrent();
+      }
+      break;
+    }
+
+    case "cancel-item": {
+      const id = actTarget.getAttribute("data-id");
+      showConfirm("Confirm Withdrawal", "Are you sure you want to cancel this entry?", () => {
+        let items = Store.getItems();
+        items = items.filter(i => i.id !== id);
+        Store.setItems(items);
+        toast("Entry successfully cancelled.", "info");
+        Router.renderCurrent();
+      });
+      break;
+    }
+
+    case "resched-pickup": {
+      const id = actTarget.getAttribute("data-id");
+      const items = Store.getItems();
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      const minDate = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+      const modal = document.getElementById("modal-container");
+      modal.innerHTML = `
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:9999;">
+          <div class="panel" style="max-width:440px;width:90%;">
+            <h3>Reschedule Pickup Slot</h3>
+            <p style="color:var(--text-muted);font-size:0.84rem;margin-bottom:1.25rem;">Reference: ${escapeHTML(item.id)}</p>
+            <div class="form-group">
+              <label>New Collection Date</label>
+              <input type="date" id="m-date" class="form-control" min="${minDate}" value="${item.pickupDate}">
+            </div>
+            <div class="form-group">
+              <label>Time Slot</label>
+              <select id="m-slot" class="form-control">
+                <option ${item.timeSlot.includes("Morning") ? "selected" : ""}>Morning (8 AM - 11 AM)</option>
+                <option ${item.timeSlot.includes("Afternoon") ? "selected" : ""}>Afternoon (12 PM - 3 PM)</option>
+                <option ${item.timeSlot.includes("Evening") ? "selected" : ""}>Evening (4 PM - 7 PM)</option>
+              </select>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.5rem;">
+              <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+              <button class="btn btn-primary" id="m-save-btn">Confirm Reschedule</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("m-save-btn").onclick = () => {
+        item.pickupDate = document.getElementById("m-date").value;
+        item.timeSlot = document.getElementById("m-slot").value;
+        Store.setItems(items);
+        modal.innerHTML = "";
+        AudioEngine.play("success");
+        toast("Pickup window rescheduled!", "success");
+        Router.renderCurrent();
+      };
+      break;
+    }
+
+    case "admin-triage": {
+      const id = actTarget.getAttribute("data-id");
+      const items = Store.getItems();
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      const modal = document.getElementById("modal-container");
+      modal.innerHTML = `
+        <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:9999;">
+          <div class="panel" style="max-width:480px;width:90%;">
+            <h3>Municipal Task Triage</h3>
+            <p style="color:var(--text-muted);font-size:0.84rem;margin-bottom:1.25rem;">Reference: ${escapeHTML(item.id)}</p>
+
+            <div class="form-group">
+              <label>Status</label>
+              <select id="adm-st" class="form-control">
+                <option ${item.status === "Pending" ? "selected" : ""}>Pending</option>
+                <option ${item.status === "Assigned" ? "selected" : ""}>Assigned</option>
+                <option ${item.status === "In Progress" ? "selected" : ""}>In Progress</option>
+                <option ${item.status === "Resolved" ? "selected" : ""}>Resolved</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Response Team</label>
+              <select id="adm-tm" class="form-control">
+                <option value="">Unassigned</option>
+                <option ${item.assignedTeam && item.assignedTeam.includes("Team A") ? "selected" : ""}>Team A (Rapid Compactor)</option>
+                <option ${item.assignedTeam && item.assignedTeam.includes("Team B") ? "selected" : ""}>Team B (Hazardous Recovery)</option>
+                <option ${item.assignedTeam && item.assignedTeam.includes("Team C") ? "selected" : ""}>Team C (Recycling Fleet)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Official Remark for Citizen</label>
+              <textarea id="adm-rmk" class="form-control" rows="3" placeholder="Explain action taken or instructions...">${escapeHTML(item.adminRemark || "")}</textarea>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:0.5rem;margin-top:1.5rem;">
+              <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+              <button class="btn btn-primary" id="adm-save-triage">Save Updates</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("adm-save-triage").onclick = () => {
+        const nextStatus = document.getElementById("adm-st").value;
+        const nextTeam = document.getElementById("adm-tm").value;
+        const nextRemark = document.getElementById("adm-rmk").value.trim();
+
+        if (nextStatus !== item.status) {
+          if (!item.timeline) item.timeline = [];
+          item.timeline.push({ status: nextStatus, timestamp: new Date().toISOString(), by: "Admin Dispatcher" });
+        }
+        item.status = nextStatus;
+        item.assignedTeam = nextTeam;
+        item.adminRemark = nextRemark;
+        item.readByCitizen = false;
+
+        if (!item.auditLog) item.auditLog = [];
+        item.auditLog.push(`${new Date().toISOString()}: Updated to ${nextStatus} by Admin`);
+
+        Store.setItems(items);
+        modal.innerHTML = "";
+        AudioEngine.play("success");
+        toast("Task triage saved successfully.", "success");
+        Router.renderCurrent();
+      };
+      break;
+    }
+
+    case "admin-del": {
+      const id = actTarget.getAttribute("data-id");
+      showConfirm("Delete Master Entry", "Permanently excise this record from municipal storage?", () => {
+        let items = Store.getItems();
+        items = items.filter(i => i.id !== id);
+        Store.setItems(items);
+        toast("Entry removed.", "info");
+        Router.renderCurrent();
+      });
+      break;
+    }
+
+    case "admin-seed":
+      seedDemoData();
+      break;
+
+    case "admin-reset":
+      showConfirm("Purge Database", "Reset all incident logs and bookings to zero?", () => {
+        Store.setItems([]);
+        toast("Database purged.", "info");
+        Router.renderCurrent();
+      });
+      break;
+
+    case "admin-export": {
+      const items = Store.getItems();
+      if (!items.length) {
+        toast("No data available to export.", "error");
+        return;
+      }
+      const headers = ["ID", "Category", "Classification", "Location", "Status", "DispatchedTeam", "CreatedAt", "AdminRemark", "Rating"];
+      const rows = items.map(i => [
+        `"${i.id}"`,
+        `"${i.category}"`,
+        `"${(i.type || i.wasteType || "").replace(/"/g, '""')}"`,
+        `"${(i.location || i.address || "").replace(/"/g, '""')}"`,
+        `"${i.status}"`,
+        `"${(i.assignedTeam || "").replace(/"/g, '""')}"`,
+        `"${i.createdAt}"`,
+        `"${(i.adminRemark || "").replace(/"/g, '""')}"`,
+        `"${i.rating || 0}"`
+      ]);
+      const csvStr = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+      const link = document.createElement("a");
+      link.setAttribute("href", encodeURI(csvStr));
+      link.setAttribute("download", `ecopulse_telemetry_${Date.now()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      AudioEngine.play("success");
+      toast("CSV exported successfully.", "success");
+      break;
+    }
+
+    case "admin-print":
+      window.print();
+      break;
+  }
+});
+
+/* ========================================================================== */
+/* ===== THEME ENGINE & APPLICATION INITIALIZATION ========================== */
+/* ========================================================================== */
+
+const ThemeManager = {
+  init() {
+    const saved = dbGet("ecopulse_theme_v8", null);
+    if (saved === "light") {
+      document.body.classList.add("light-theme");
+      document.getElementById("theme-toggle").innerHTML = "&#9790;";
+    } else {
+      document.body.classList.remove("light-theme");
+      document.getElementById("theme-toggle").innerHTML = "&#9788;";
+    }
+
+    document.getElementById("theme-toggle").onclick = () => {
+      const isLight = document.body.classList.toggle("light-theme");
+      dbSet("ecopulse_theme_v8", isLight ? "light" : "dark");
+      document.getElementById("theme-toggle").innerHTML = isLight ? "&#9790;" : "&#9788;";
+      AudioEngine.play("click");
+    };
+  }
+};
+
+document.getElementById("notif-btn").onclick = () => {
+  Router.navigate("tracking");
+};
+
+const langSelHeader = document.getElementById("lang-selector-header");
+if (langSelHeader) {
+  langSelHeader.onchange = (e) => {
+    I18nEngine.setLang(e.target.value);
+  };
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+  I18nEngine.init();
+  await Auth.initAdmin();
+  ThemeManager.init();
+  Router.init();
+});
+  </script>
+</body>
+</html>
