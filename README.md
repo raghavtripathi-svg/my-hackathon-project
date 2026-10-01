@@ -3,8 +3,7 @@
 
 EcoPulse OS is an enterprise-grade, zero-dependency municipal operating system. It bridges the gap between citizen waste reporting and city sanitation dispatch through interactive GIS mapping, client-side neural vision simulation, and algorithmic fleet route optimization.
 
-🔗 **[Click Here to Test the Live Web App](https://<your-username>.github.io/ecopulse-os/)**  
-*(Note: Replace the link above with your actual GitHub Pages URL)*
+🔗 **[Click Here to Test the Live Web App](file:///C:/Users/LENOVO/OneDrive/Documents/SPECTRUM2.o/index.html#awareness)**  
 
 ---
 
